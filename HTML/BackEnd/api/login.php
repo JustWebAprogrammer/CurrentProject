@@ -29,7 +29,14 @@ try {
             
             if ($resultadoAdmin['sucesso']) {
                 AuthUnified::logarUsuario($resultadoAdmin['usuario'], $resultadoAdmin['usuario']['tipo']);
-                header("Location: ../../dashboard.html");
+                
+                // Redirecionar baseado no tipo de usuário
+                if ($resultadoAdmin['usuario']['tipo'] === 'Rececionista') {
+                    header("Location: ../../dashboard-recepcionista.html");
+                } else {
+                    // Para Administrador
+                    header("Location: ../../dashboard.html");
+                }
                 exit;
             }
             
