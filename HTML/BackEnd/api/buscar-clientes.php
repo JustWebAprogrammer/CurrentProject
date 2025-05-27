@@ -8,6 +8,7 @@ if (session_status() == PHP_SESSION_NONE) {
 
 require_once '../config/database.php';
 require_once '../models/Cliente.php';
+require_once '../controllers/ReservaController.php';
 
 $database = new Database();
 $db = $database->getConnection();
@@ -23,7 +24,23 @@ $method = $_SERVER['REQUEST_METHOD'];
 if ($method === 'GET') {
     $cliente = new Cliente($db);
     
-    // Parâmetros de busca
+    // Verificar se é uma requisição para buscar reservas de um cliente específico
+    if (isset($_GET['acao']) && $_GET['acao'] === 'reservas' && isset($_GET['cliente_id'])) {
+        $cliente_id = $_GET['cliente_id'];
+        $filtro = $_GET['filtro'] ?? 'proximas';
+        
+        try {
+            $controller = new ReservaController($db);
+            $reservas = $controller->buscarReservasPorCliente($cliente_id, $filtro);
+            echo json_encode($reservas);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(["erro" => "Erro ao buscar reservas: " . $e->getMessage()]);
+        }
+        exit;
+    }
+    
+    // Código original para busca de clientes
     $termo = $_GET['termo'] ?? '';
     $tipo = $_GET['tipo'] ?? 'nome'; // nome, email, telefone
     
@@ -32,16 +49,13 @@ if ($method === 'GET') {
         
         if (!empty($termo)) {
             switch($tipo) {
-               
                 case 'id':
                     $clienteEncontrado = $cliente->buscarPorId($termo);
                     if ($clienteEncontrado) {
                         $clientes[] = $clienteEncontrado;
                     }
                     break;
-
-               
-               
+                    
                 case 'email':
                     $clienteEncontrado = $cliente->buscarPorEmail($termo);
                     if ($clienteEncontrado) {

@@ -169,20 +169,21 @@ function mostrarDetalhesCliente(cliente) {
 // Carregar reservas do cliente
 async function carregarReservasCliente(clienteId) {
     try {
-        const response = await fetch(`BackEnd/api/reservas.php?cliente_id=${clienteId}&filtro=${filtroReservaAtual}`);
-        const data = await response.json();
-        
-        if (data.sucesso) {
-            mostrarReservasCliente(data.reservas);
-        } else {
-            document.getElementById('reservas-lista').innerHTML = '<p>Erro ao carregar reservas do cliente.</p>';
-        }
-    } catch (error) {
-        console.error('Erro ao carregar reservas:', error);
-        document.getElementById('reservas-lista').innerHTML = '<p>Erro de conexão ao carregar reservas.</p>';
-    }
-}
-
+          // CORREÇÃO: Usar o endpoint correto no buscar-clientes.php
+          const response = await fetch(`BackEnd/api/buscar-clientes.php?acao=reservas&cliente_id=${clienteId}&filtro=${filtroReservaAtual}`);
+          const data = await response.json();
+          
+          if (data.sucesso) {
+              mostrarReservasCliente(data.reservas);
+          } else {
+              document.getElementById('reservas-lista').innerHTML = '<p>Erro ao carregar reservas do cliente.</p>';
+              console.error('Erro ao carregar reservas:', data.erro);
+          }
+      } catch (error) {
+          console.error('Erro ao carregar reservas:', error);
+          document.getElementById('reservas-lista').innerHTML = '<p>Erro de conexão ao carregar reservas.</p>';
+      }
+  }
 // Mostrar reservas do cliente
 function mostrarReservasCliente(reservas) {
     const listaDiv = document.getElementById('reservas-lista');
