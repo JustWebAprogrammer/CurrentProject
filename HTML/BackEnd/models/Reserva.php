@@ -13,38 +13,65 @@ class Reserva {
     public $num_pessoas;
     public $status;
 
+    public $mesas_necessarias; // Nova propriedade
+
+
+
     public function __construct($db) {
         $this->conn = $db;
     }
 
     public function criar() {
         $query = "INSERT INTO " . $this->table_name . " 
-                  (cliente_id, mesa_id, data, hora, num_pessoas, status) 
-                  VALUES (:cliente_id, :mesa_id, :data, :hora, :num_pessoas, :status)";
+        (cliente_id, mesa_id, data, hora, num_pessoas, mesas_necessarias, status) 
+        VALUES (:cliente_id, :mesa_id, :data, :hora, :num_pessoas, :mesas_necessarias, :status)";
 
-        $stmt = $this->conn->prepare($query);
+$stmt = $this->conn->prepare($query);
 
-        // Limpar dados
-        $this->cliente_id = htmlspecialchars(strip_tags($this->cliente_id));
-        $this->mesa_id = htmlspecialchars(strip_tags($this->mesa_id));
-        $this->data = htmlspecialchars(strip_tags($this->data));
-        $this->hora = htmlspecialchars(strip_tags($this->hora));
-        $this->num_pessoas = htmlspecialchars(strip_tags($this->num_pessoas));
-        $this->status = htmlspecialchars(strip_tags($this->status));
+// Limpar dados
+$this->cliente_id = htmlspecialchars(strip_tags($this->cliente_id));
+$this->mesa_id = $this->mesa_id; // Pode ser NULL
+$this->data = htmlspecialchars(strip_tags($this->data));
+$this->hora = htmlspecialchars(strip_tags($this->hora));
+$this->num_pessoas = htmlspecialchars(strip_tags($this->num_pessoas));
+$this->mesas_necessarias = htmlspecialchars(strip_tags($this->mesas_necessarias));
+$this->status = htmlspecialchars(strip_tags($this->status));
 
-        // Bind dos parâmetros
-        $stmt->bindParam(":cliente_id", $this->cliente_id);
-        $stmt->bindParam(":mesa_id", $this->mesa_id);
-        $stmt->bindParam(":data", $this->data);
-        $stmt->bindParam(":hora", $this->hora);
-        $stmt->bindParam(":num_pessoas", $this->num_pessoas);
-        $stmt->bindParam(":status", $this->status);
+// Bind dos parâmetros
+$stmt->bindParam(":cliente_id", $this->cliente_id);
+$stmt->bindParam(":mesa_id", $this->mesa_id);
+$stmt->bindParam(":data", $this->data);
+$stmt->bindParam(":hora", $this->hora);
+$stmt->bindParam(":num_pessoas", $this->num_pessoas);
+$stmt->bindParam(":mesas_necessarias", $this->mesas_necessarias);
+$stmt->bindParam(":status", $this->status);
 
-        if($stmt->execute()) {
-            return true;
-        }
-        return false;
+return $stmt->execute();
+
     }
+
+
+// Método simplificado para verificar disponibilidade
+public function verificarDisponibilidade($data, $hora, $mesas_necessarias) {
+    $query = "SELECT 
+                (SELECT COUNT(*) FROM mesas WHERE estado = 'Livre') as total_mesas,
+                COALESCE(SUM(mesas_necessarias), 0) as mesas_reservadas
+              FROM reservas 
+              WHERE data = :data 
+              AND hora = :hora 
+              AND status = 'Reservado'";
+
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(":data", $data);
+    $stmt->bindParam(":hora", $hora);
+    $stmt->execute();
+
+    $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+    $mesas_disponiveis = $resultado['total_mesas'] - $resultado['mesas_reservadas'];
+
+    return $mesas_disponiveis >= $mesas_necessarias;
+}
+
 
 
     // NOVO MÉTODO para buscar mesas excluindo reserva atual

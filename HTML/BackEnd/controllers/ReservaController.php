@@ -13,70 +13,71 @@ class ReservaController {
 
     public function criarReserva($dados) {
         // Validar dados
-        $validacao = $this->validarDadosReserva($dados);
-        if (!$validacao['valido']) {
-            return [
-                'sucesso' => false,
-                'erro' => $validacao['erro']
-            ];
-        }
-    
-        // Verificar disponibilidade de mesas
-        $mesasDisponiveis = $this->reserva->buscarMesasDisponiveis(
-            $dados['data'],
-            $dados['hora'],
-            $dados['num_pessoas']
-        );
-    
-        $mesasNecessarias = ceil($dados['num_pessoas'] / 4);
-        
-        if (count($mesasDisponiveis) < $mesasNecessarias) {
-            return [
-                'sucesso' => false,
-                'erro' => 'Não há mesas suficientes disponíveis para este horário.'
-            ];
-        }
-    
-        // Criar APENAS UMA reserva principal
-        $this->reserva->cliente_id = $dados['cliente_id'];
-        $this->reserva->mesa_id = $mesasDisponiveis[0]['id']; // Mesa principal
-        $this->reserva->data = $dados['data'];
-        $this->reserva->hora = $dados['hora'];
-        $this->reserva->num_pessoas = $dados['num_pessoas']; // Número total de pessoas
-        $this->reserva->status = 'Reservado';
-    
-        if ($this->reserva->criar()) {
-            $reserva_principal_id = $this->db->lastInsertId();
-            
-            // Se precisar de mais mesas, criar reservas auxiliares (apenas para bloquear as mesas)
-            $reservas_auxiliares = [];
-            for ($i = 1; $i < $mesasNecessarias; $i++) {
-                if ($this->criarReservaAuxiliar($dados, $mesasDisponiveis[$i]['id'], $reserva_principal_id)) {
-                    $reservas_auxiliares[] = $this->db->lastInsertId();
-                } else {
-                    // Se falhar, cancelar tudo
-                    $this->cancelarReserva($reserva_principal_id);
-                    $this->cancelarReservas($reservas_auxiliares);
-                    return [
-                        'sucesso' => false,
-                        'erro' => 'Erro ao reservar todas as mesas necessárias.'
-                    ];
-                }
-            }
-    
-            return [
-                'sucesso' => true,
-                'mensagem' => 'Reserva criada com sucesso!',
-                'reserva_id' => $reserva_principal_id,
-                'mesas_reservadas' => $mesasNecessarias
-            ];
-        } else {
-            return [
-                'sucesso' => false,
-                'erro' => 'Erro ao criar reserva.'
-            ];
-        }
+    $validacao = $this->validarDadosReserva($dados);
+    if (!$validacao['valido']) {
+        return [
+            'sucesso' => false,
+            'erro' => $validacao['erro']
+        ];
     }
+
+    // Verificar quantas mesas estão disponíveis no horário
+    $mesasLivres = $this->contarMesasLivres($dados['data'], $dados['hora']);
+    $mesasNecessarias = ceil($dados['num_pessoas'] / 4);
+    
+    if ($mesasLivres < $mesasNecessarias) {
+        return [
+            'sucesso' => false,
+            'erro' => "Não há mesas suficientes disponíveis. Necessárias: {$mesasNecessarias}, Disponíveis: {$mesasLivres}"
+        ];
+    }
+
+    // Criar apenas UMA reserva simples (sem mesa específica)
+    $this->reserva->cliente_id = $dados['cliente_id'];
+    $this->reserva->mesa_id = null; // Sem mesa específica
+    $this->reserva->data = $dados['data'];
+    $this->reserva->hora = $dados['hora'];
+    $this->reserva->num_pessoas = $dados['num_pessoas'];
+    $this->reserva->mesas_necessarias = $mesasNecessarias; // Nova coluna
+    $this->reserva->status = 'Reservado';
+
+    if ($this->reserva->criar()) {
+        return [
+            'sucesso' => true,
+            'mensagem' => 'Reserva criada com sucesso!',
+            'reserva_id' => $this->db->lastInsertId(),
+            'mesas_reservadas' => $mesasNecessarias
+        ];
+    } else {
+        return [
+            'sucesso' => false,
+            'erro' => 'Erro ao criar reserva.'
+        ];
+    }
+}
+
+// Novo método para contar mesas livres
+private function contarMesasLivres($data, $hora) {
+    // Contar total de mesas no sistema
+    $query_total = "SELECT COUNT(*) as total FROM mesas WHERE estado = 'Livre'";
+    $stmt_total = $this->db->prepare($query_total);
+    $stmt_total->execute();
+    $total_mesas = $stmt_total->fetch(PDO::FETCH_ASSOC)['total'];
+    
+    // Contar mesas já reservadas para este horário
+    $query_reservadas = "SELECT SUM(mesas_necessarias) as reservadas 
+                        FROM reservas 
+                        WHERE data = :data 
+                        AND hora = :hora 
+                        AND status = 'Reservado'";
+    $stmt_reservadas = $this->db->prepare($query_reservadas);
+    $stmt_reservadas->bindParam(":data", $data);
+    $stmt_reservadas->bindParam(":hora", $hora);
+    $stmt_reservadas->execute();
+    $mesas_reservadas = $stmt_reservadas->fetch(PDO::FETCH_ASSOC)['reservadas'] ?? 0;
+    
+    return $total_mesas - $mesas_reservadas;
+}
     
     // Novo método para criar reservas auxiliares (só para bloquear mesas)
     private function criarReservaAuxiliar($dados, $mesa_id, $reserva_principal_id) {

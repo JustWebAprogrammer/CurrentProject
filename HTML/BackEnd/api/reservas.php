@@ -130,6 +130,18 @@ switch($method) {
         echo json_encode($reservas);
         break;
 
+        case 'proximas':
+            $query = "SELECT r.*, 
+                             r.mesas_necessarias as total_mesas,
+                             'N/A' as capacidade
+                      FROM reservas r 
+                      WHERE r.cliente_id = :cliente_id 
+                      AND r.status = 'Reservado'
+                      AND r.num_pessoas > 0
+                      AND (r.data > :hoje OR (r.data = :hoje AND r.hora >= :agora))
+                      ORDER BY r.data ASC, r.hora ASC";
+            break;
+
         case 'PUT':
             try {
                 // DEBUG
