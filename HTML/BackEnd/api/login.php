@@ -6,6 +6,7 @@ if (session_status() == PHP_SESSION_NONE) {
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../controllers/AuthController.php';
 require_once __DIR__ . '/../controllers/AdminController.php';
+require_once __DIR__ . '/../auth_unified.php';
 
 try {
     $database = new Database();
@@ -27,7 +28,7 @@ try {
             $resultadoAdmin = $adminController->login($email, $senha);
             
             if ($resultadoAdmin['sucesso']) {
-                $_SESSION['admin_logado'] = $resultadoAdmin['usuario'];
+                AuthUnified::logarUsuario($resultadoAdmin['usuario'], $resultadoAdmin['usuario']['tipo']);
                 header("Location: ../../dashboard.html");
                 exit;
             }
@@ -37,7 +38,7 @@ try {
             $resultadoCliente = $authController->login($email, $senha);
             
             if ($resultadoCliente['sucesso']) {
-                $_SESSION['cliente_logado'] = $resultadoCliente['cliente'];
+                AuthUnified::logarUsuario($resultadoCliente['cliente'], 'Cliente');
                 header("Location: ../../Perfil.php");
                 exit;
             }

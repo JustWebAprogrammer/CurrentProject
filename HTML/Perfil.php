@@ -5,16 +5,14 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once 'BackEnd/verificar_sessao.php';
 
-// Verificar se o usuário está logado
-if (!verificarLogin()) {
-    header("Location: Login.html");
-    exit;
-}
+require_once 'BackEnd/auth_unified.php';
+require_once 'BackEnd/middleware/auth_middleware.php';
 
-$cliente = obterClienteLogado();
+// Proteger página para clientes
+AuthMiddleware::protegerRotaCliente();
 
+$cliente = AuthUnified::obterUsuarioLogado();
 
 ?>
 <!DOCTYPE html>

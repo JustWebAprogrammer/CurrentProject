@@ -9,7 +9,10 @@ if (session_status() == PHP_SESSION_NONE) {
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../models/Cliente.php';
-require_once __DIR__ . '/../verificar_sessao.php';
+require_once __DIR__ . '/../middleware/auth_middleware.php';
+
+// Proteger rota para clientes apenas
+AuthMiddleware::protegerRotaCliente();
 
 // Verificar se o usuário está logado
 if (!verificarLogin()) {
