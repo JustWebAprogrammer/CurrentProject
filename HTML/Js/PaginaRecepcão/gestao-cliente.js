@@ -4,6 +4,10 @@ let mesasSelecionadas = [];
 let numPessoasAtual = 0;
 let mesasDisponiveis = [];
 let filtroReservaAtual = 'proximas';
+// Variável para controlar o timeout
+let timeoutBusca = null;
+
+
 
 // Função para limitar input de número
 function limitarNumeroInput(input, maxValue = 60) {
@@ -74,25 +78,34 @@ async function buscarCliente() {
     const tipoBusca = document.getElementById('tipo-busca').value;
     const termoBusca = document.getElementById('campo-busca').value.trim();
     
-    if (termoBusca.length < 2) {
+    // Limpar timeout anterior
+    if (timeoutBusca) {
+        clearTimeout(timeoutBusca);
+    }
+    
+    // Se campo estiver vazio, ocultar resultados
+    if (termoBusca.length === 0) {
         document.getElementById('resultados-busca').style.display = 'none';
         return;
     }
     
-    try {
-        const response = await fetch(`BackEnd/api/buscar-clientes.php?tipo=${tipoBusca}&termo=${encodeURIComponent(termoBusca)}`);
-        const data = await response.json();
-        
-        if (data.sucesso) {
-            mostrarResultadosBusca(data.clientes);
-        } else {
-            console.error('Erro ao buscar clientes:', data.erro);
-            mostrarMensagemErro('Erro ao buscar clientes: ' + data.erro);
+    // Aguardar 300ms após parar de digitar (reduzido para mais responsividade)
+    timeoutBusca = setTimeout(async () => {
+        try {
+            const response = await fetch(`BackEnd/api/buscar-clientes.php?tipo=${tipoBusca}&termo=${encodeURIComponent(termoBusca)}`);
+            const data = await response.json();
+            
+            if (data.sucesso) {
+                mostrarResultadosBusca(data.clientes);
+            } else {
+                console.error('Erro ao buscar clientes:', data.erro);
+                mostrarMensagemErro('Erro ao buscar clientes: ' + data.erro);
+            }
+        } catch (error) {
+            console.error('Erro na requisição:', error);
+            mostrarMensagemErro('Erro de conexão ao buscar clientes');
         }
-    } catch (error) {
-        console.error('Erro na requisição:', error);
-        mostrarMensagemErro('Erro de conexão ao buscar clientes');
-    }
+    }, 300);
 }
 
 // Mostrar resultados da busca
@@ -612,15 +625,26 @@ document.addEventListener('DOMContentLoaded', function() {
         numPessoasInput.addEventListener('change', atualizarCalculoMesas);
     }
     
-    // Configurar busca por Enter
-    const campoBusca = document.getElementById('campo-busca');
-    if (campoBusca) {
-        campoBusca.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                buscarCliente();
+  // Configurar busca (versão final)
+const campoBusca = document.getElementById('campo-busca');
+if (campoBusca) {
+    // Remover listeners anteriores (se existirem)
+    campoBusca.removeEventListener('input', buscarCliente);
+    campoBusca.removeEventListener('keypress', buscarCliente);
+    
+    // Adicionar listeners limpos
+    campoBusca.addEventListener('input', buscarCliente);
+    
+    campoBusca.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            // Limpar timeout e buscar imediatamente no Enter
+            if (timeoutBusca) {
+                clearTimeout(timeoutBusca);
             }
-        });
-    }
+            buscarCliente();
+        }
+    });
+}
     
     // Iniciar atualização automática
     iniciarAtualizacaoAutomatica();

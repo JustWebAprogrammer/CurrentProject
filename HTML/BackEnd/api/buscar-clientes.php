@@ -32,6 +32,16 @@ if ($method === 'GET') {
         
         if (!empty($termo)) {
             switch($tipo) {
+               
+                case 'id':
+                    $clienteEncontrado = $cliente->buscarPorId($termo);
+                    if ($clienteEncontrado) {
+                        $clientes[] = $clienteEncontrado;
+                    }
+                    break;
+
+               
+               
                 case 'email':
                     $clienteEncontrado = $cliente->buscarPorEmail($termo);
                     if ($clienteEncontrado) {

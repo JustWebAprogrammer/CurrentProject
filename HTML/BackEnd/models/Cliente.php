@@ -80,6 +80,26 @@ class Cliente {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
+
+    public function buscarPorId($id) {
+        $query = "SELECT id, nome, email, telemovel, data_criacao 
+                  FROM " . $this->table_name . " 
+                  WHERE id = :id LIMIT 1";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($row) {
+            return $row;
+        }
+        
+        return false;
+    }
+
+
     public function buscarTodos($limite = 50) {
         $query = "SELECT id, nome, email, telemovel, data_criacao 
                   FROM clientes 
