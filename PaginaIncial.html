@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pagina Inicial</title>
+    <link rel="stylesheet" href="Css/Universal/nav.css"/>
+    <link rel="stylesheet" href="Css/PaginaPrincipal/main.css">
+    <link rel="stylesheet" href="Css/PaginaPrincipal/cards.css">
+    <link rel="stylesheet" href="Css/Universal/footer.css">
+  </head>
+  <body>
+   <!-- Navegação -->
+   <nav>
+    <div class="Logotipo">
+        <img src="Fotos/Icondesite.png" alt="Logotipo do Site">
+    </div>
+    <div class="navbar">
+        <button>Sua Reservas</button>
+        <button>Inicio</button>
+        <button>Entrar</button>
+    </div>
+</nav>
+
+<!-- Conteúdo Principal -->
+<main>
+    
+    <!-- Imagem de Fundo -->
+    <div class="FundoPrincipal">
+        <img src="Fotos/FrontImg.png" alt="Imagem de Fundo">
+    </div>
+
+    <!-- Seções Principais -->
+    <div class="main-container">
+        <!-- Seção de Login -->
+        <section class="NivelEnferiorEsq">
+            <h3>Acesse ou crie sua conta</h3>
+            <p>Faça login e acompanhe o estado da sua reservas</p>
+            <button>Enter</button>
+        </section>
+
+        <!-- Formulário de Reserva -->
+        <div class="NivelEnferiorDir">
+            <h2>Faça sua reserva</h2>
+            <p>Encontre a sua reserva ideal</p>
+            <form id="reserva-form" action="BackEnd/api/reservas.php" method="POST" onsubmit="return validateForm(event)">
+                <div class="form-group">
+                    <label for="reservation-date">Data Desejada</label>
+                    <input type="date" id="reservation-date" name="reservation_date" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="num-people">Número de pessoas</label>
+                    <input type="number" id="num-people" name="num_people" min="1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="reservation-time">Melhor Horário</label>
+                    <input type="time" id="reservation-time" name="reservation_time" required>
+                </div>
+                
+                <button type="submit">Encontrar reservas</button>
+            </form>
+            <div id="error-message" class="error-message"></div>
+            <p>No caso não tiver reservas para marcar</p>
+        </div>
+    </div>
+
+    <!-- Seção de Ocasiões -->
+    <section class="occasions-section">
+        <h2>Ocasiões</h2>
+        <p>Sugestões para seus momentos especiais</p>
+        <div class="occasions-container">
+            <div class="occasion-card">
+            <img src="Fotos/Jantaradois.png" alt="Jantar a dois" class="card-image">    
+                <p>Jantar a dois</p>
+            </div>
+            <div class="occasion-card">
+                <img src="Fotos/EmFamilia.png" alt="Uma família" class="card-image">
+                <p>Ir com família</p>
+            </div>
+            <div class="occasion-card">
+                <img src="Fotos/Almocofimdesemana.png" alt="Alguem comendo" class="card-image">
+                <p>Almoço de fim de semana</p>
+            </div>
+            <div class="occasion-card">
+                <img src="Fotos/Aniversario.png" alt="Aniversário" class="card-image">
+                <p>Comemorar aniversário</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Seção de Experiências Gastronômicas -->
+    <section class="gastronomic-section">
+        <h2>Experiências gastronômicas</h2>
+        <p>Descubra novas experiências gastronômicas</p>
+        <div class="gastronomic-container">
+            <div class="gastronomic-card">
+                <img src="Fotos/Bebidas.png" alt="Bebidas" class="card-image">
+                <p>Bebidas</p>
+            </div>
+            <div class="gastronomic-card">
+                <img src="Fotos/apretetivos.png" alt="Aperitivos" class="card-image">
+                <p>Aperitivos de qualidade</p>
+            </div>
+            <div class="gastronomic-card">
+                <img src="Fotos/Pratos.png" alt="Pratos" class="card-image">
+                <p>Pratos tradicionais e do exterior</p>
+            </div>
+            <div class="gastronomic-card">
+                <img src="Fotos/Sobremesas.png" alt="Sobremesas" class="card-image">
+                <p>Sobremesas</p>
+            </div>
+        </div>
+    </section>
+</main>
+
+
+    <!--Rodape Do Site-->
+
+<footer class="footer-section">
+    <div class="footer-container">
+        <div class="footer-logo">
+            <img src="Fotos/Icondesite.png" alt="Logo do Restaurante">
+            <p>Lar Da Dona Xinga</p>
+        </div>
+        
+        <div class="footer-help">
+            <h3>Precisa de ajuda com sua reserva?</h3>
+            <p>Entre em contato conosco: <a href="mailto:Tomaszinho19@gmail.com">contato@restaurante.com</a></p>
+            <p>Telefone: (+244) 942-761-755</p>
+        </div>
+        <div class="footer-links">
+            <h3>Dúvidas Frequentes</h3>
+            <ul>
+                <li><a href="faq.html">Perguntas Frequentes</a></li>
+                <li><a href="termos.html">Termos de Uso e Política de Privacidade</a></li>
+                <li><a href="contato.html">Fale Conosco</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2025 Lar Da Dona Xinga. Todos os direitos reservados.</p>
+    </div>
+</footer>
+
+<script src="Js/Universal/nav-dinamico.js"></script>
+<script src="Js/PaginaPrincipalReserva/reserva.js"></script>
+ 
+
+
+</body>
+</html>
