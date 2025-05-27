@@ -65,6 +65,34 @@ class Cliente {
         return false;
     }
 
+    public function buscarPorNome($nome) {
+        $query = "SELECT id, nome, email, telemovel, data_criacao 
+                  FROM clientes 
+                  WHERE nome LIKE :nome 
+                  ORDER BY nome ASC 
+                  LIMIT 20";
+        
+        $stmt = $this->conn->prepare($query);
+        $termo_busca = "%{$nome}%";
+        $stmt->bindParam(":nome", $termo_busca);
+        
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    public function buscarTodos($limite = 50) {
+        $query = "SELECT id, nome, email, telemovel, data_criacao 
+                  FROM clientes 
+                  ORDER BY nome ASC 
+                  LIMIT :limite";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":limite", $limite, PDO::PARAM_INT);
+        
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     function buscarPorEmail($email) {
         $query = "SELECT id, nome, email, telemovel, senha, data_criacao 
                   FROM " . $this->table_name . " 

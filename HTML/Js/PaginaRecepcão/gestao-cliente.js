@@ -1,29 +1,10 @@
-// Site/HTML/Js/Recepcionista/gestao-clientes.js - Versão Atualizada
-
-// Dados simulados das mesas (todas com capacidade padrão de 4)
-const mesasSimuladas = [
-    { id: 1, capacidade: 4, estado: 'Livre' },
-    { id: 2, capacidade: 4, estado: 'Ocupada', cliente: 'João Silva', pessoas: 30, horaOcupacao: '18:30' },
-    { id: 3, capacidade: 4, estado: 'Livre' },
-    { id: 4, capacidade: 4, estado: 'Livre' },
-    { id: 5, capacidade: 4, estado: 'Livre'},
-    { id: 6, capacidade: 4, estado: 'Livre' },
-    { id: 7, capacidade: 4, estado: 'Livre' },
-    { id: 8, capacidade: 4, estado: 'Livre' },
-    { id: 9, capacidade: 4, estado: 'Livre' },
-    { id: 10, capacidade: 4, estado: 'Livre' },
-    { id: 11, capacidade: 4, estado: 'Livre' },
-    { id: 12, capacidade: 4, estado: 'Livre' },
-    { id: 13, capacidade: 4, estado: 'Livre' },
-    { id: 14, capacidade: 4, estado: 'Livre' },
-    { id: 15, capacidade: 4, estado: 'Livre' }
-];
-
+// Variáveis globais
 let clienteSelecionado = null;
 let mesasSelecionadas = [];
 let numPessoasAtual = 0;
+let mesasDisponiveis = [];
 
-
+// Função para limitar input de número
 function limitarNumeroInput(input, maxValue = 60) {
     input.addEventListener('input', function(e) {
         let value = parseInt(e.target.value);
@@ -57,7 +38,6 @@ function limitarNumeroInput(input, maxValue = 60) {
     });
 }
 
-
 // Função para calcular número de mesas necessárias
 function calcularMesasNecessarias(numPessoas) {
     if (numPessoas <= 4) {
@@ -77,13 +57,122 @@ function distribuirPessoas(numPessoas, numMesas) {
         if (i < pessoasRestantes) {
             pessoas += 1;
         }
-        distribuicao.push(Math.min(pessoas, 4)); // Máximo 4 por mesa
+        distribuicao.push(Math.min(pessoas, 4));
     }
     
     return distribuicao;
 }
 
-// Atualizar a função que monitora mudanças no número de pessoas
+// Buscar cliente
+async function buscarCliente() {
+    const tipoBusca = document.getElementById('tipo-busca').value;
+    const termoBusca = document.getElementById('campo-busca').value.trim();
+    
+    if (termoBusca.length < 2) {
+        document.getElementById('resultados-busca').style.display = 'none';
+        return;
+    }
+    
+    try {
+        const response = await fetch(`BackEnd/api/buscar-clientes.php?tipo=${tipoBusca}&termo=${encodeURIComponent(termoBusca)}`);
+        const data = await response.json();
+        
+        if (data.sucesso) {
+            mostrarResultadosBusca(data.clientes);
+        } else {
+            console.error('Erro ao buscar clientes:', data.erro);
+        }
+    } catch (error) {
+        console.error('Erro na requisição:', error);
+    }
+}
+
+// Mostrar resultados da busca
+function mostrarResultadosBusca(clientes) {
+    const resultadosDiv = document.getElementById('resultados-busca');
+    const listaDiv = document.getElementById('lista-clientes');
+    
+    if (clientes.length === 0) {
+        listaDiv.innerHTML = '<p>Nenhum cliente encontrado.</p>';
+    } else {
+        listaDiv.innerHTML = clientes.map(cliente => `
+            <div class="cliente-item" onclick="selecionarCliente(${cliente.id})">
+                <h4>${cliente.nome}</h4>
+                <p>Email: ${cliente.email}</p>
+                <p>Telefone: ${cliente.telemovel}</p>
+                <p>Cliente desde: ${new Date(cliente.data_criacao).toLocaleDateString('pt-BR')}</p>
+            </div>
+        `).join('');
+    }
+    
+    resultadosDiv.style.display = 'block';
+}
+
+// Selecionar cliente
+async function selecionarCliente(clienteId) {
+    try {
+        // Buscar detalhes do cliente
+        const response = await fetch(`BackEnd/api/buscar-clientes.php?cliente_id=${clienteId}`);
+        const data = await response.json();
+        
+        if (data.sucesso && data.clientes.length > 0) {
+            clienteSelecionado = data.clientes[0];
+            mostrarDetalhesCliente(clienteSelecionado);
+            
+            // Buscar reservas do cliente
+            await carregarReservasCliente(clienteId);
+        }
+    } catch (error) {
+        console.error('Erro ao carregar cliente:', error);
+    }
+}
+
+// Mostrar detalhes do cliente
+function mostrarDetalhesCliente(cliente) {
+    document.getElementById('cliente-nome').textContent = cliente.nome;
+    document.getElementById('cliente-email').textContent = cliente.email;
+    document.getElementById('cliente-telefone').textContent = cliente.telemovel;
+    document.getElementById('cliente-data').textContent = new Date(cliente.data_criacao).toLocaleDateString('pt-BR');
+    
+    document.getElementById('detalhes-cliente').style.display = 'block';
+}
+
+// Carregar reservas do cliente
+async function carregarReservasCliente(clienteId) {
+    try {
+        const response = await fetch(`BackEnd/api/reservas.php?cliente_id=${clienteId}&filtro=proximas`);
+        const data = await response.json();
+        
+        if (data.sucesso) {
+            mostrarReservasCliente(data.reservas);
+        }
+    } catch (error) {
+        console.error('Erro ao carregar reservas:', error);
+    }
+}
+
+// Mostrar reservas do cliente
+function mostrarReservasCliente(reservas) {
+    const listaDiv = document.getElementById('reservas-lista');
+    
+    if (reservas.length === 0) {
+        listaDiv.innerHTML = '<p>Este cliente não possui reservas.</p>';
+        return;
+    }
+    
+    listaDiv.innerHTML = reservas.map(reserva => `
+        <div class="reserva-item">
+            <h4>Reserva #${reserva.id}</h4>
+            <p><strong>Data:</strong> ${new Date(reserva.data).toLocaleDateString('pt-BR')}</p>
+            <p><strong>Horário:</strong> ${reserva.hora}</p>
+            <p><strong>Pessoas:</strong> ${reserva.num_pessoas}</p>
+            <p><strong>Mesa:</strong> ${reserva.mesa_id}</p>
+            <p><strong>Status:</strong> ${reserva.status}</p>
+        </div>
+    `).join('');
+}
+
+// Atualizar cálculo de mesas
 function atualizarCalculoMesas() {
     const numPessoas = parseInt(document.getElementById('num-pessoas-walkin').value) || 0;
     numPessoasAtual = numPessoas;
@@ -104,15 +193,14 @@ function atualizarCalculoMesas() {
         mostrarCalculoMesas(numPessoas);
     }
     
-    // Atualizar estado do botão
     atualizarBotaoOcupar();
 }
 
+// Mostrar cálculo de mesas
 function mostrarCalculoMesas(numPessoas) {
     const mesasNecessarias = calcularMesasNecessarias(numPessoas);
     const distribuicao = distribuirPessoas(numPessoas, mesasNecessarias);
     
-    // Criar elemento de informação
     const infoDiv = document.createElement('div');
     infoDiv.className = 'mesas-calculadas';
     
@@ -143,11 +231,11 @@ function mostrarCalculoMesas(numPessoas) {
         <p><strong>Selecione ${mesasNecessarias} mesa${mesasNecessarias > 1 ? 's' : ''} disponível${mesasNecessarias > 1 ? 'eis' : ''} abaixo:</strong></p>
     `;
     
-    // Inserir antes do grid de mesas
     const mesasGrid = document.getElementById('mesas-grid');
     mesasGrid.parentNode.insertBefore(infoDiv, mesasGrid);
 }
 
+// Selecionar mesa
 function selecionarMesa(mesaId) {
     if (numPessoasAtual === 0) {
         alert('Por favor, informe primeiro o número de pessoas.');
@@ -157,18 +245,15 @@ function selecionarMesa(mesaId) {
     const mesasNecessarias = calcularMesasNecessarias(numPessoasAtual);
     const mesaCard = document.querySelector(`[onclick="selecionarMesa(${mesaId})"]`);
     
-    // Se a mesa já está selecionada, desselecioná-la
     if (mesasSelecionadas.includes(mesaId)) {
         mesasSelecionadas = mesasSelecionadas.filter(id => id !== mesaId);
         mesaCard.classList.remove('selected', 'selected-multiple');
     } else {
-        // Verificar se já temos o número necessário de mesas
         if (mesasSelecionadas.length >= mesasNecessarias) {
             alert(`Você já selecionou ${mesasNecessarias} mesa${mesasNecessarias > 1 ? 's' : ''}, que é o necessário para ${numPessoasAtual} pessoas.`);
             return;
         }
         
-        // Adicionar mesa à seleção
         mesasSelecionadas.push(mesaId);
         
         if (mesasNecessarias === 1) {
@@ -181,6 +266,7 @@ function selecionarMesa(mesaId) {
     atualizarBotaoOcupar();
 }
 
+// Atualizar botão ocupar
 function atualizarBotaoOcupar() {
     const botaoOcupar = document.querySelector('.ocupar-btn');
     const mesasNecessarias = calcularMesasNecessarias(numPessoasAtual);
@@ -199,7 +285,8 @@ function atualizarBotaoOcupar() {
     }
 }
 
-function ocuparMesa() {
+// Ocupar mesa
+async function ocuparMesa() {
     if (mesasSelecionadas.length === 0) {
         alert('Por favor, selecione pelo menos uma mesa.');
         return;
@@ -207,51 +294,37 @@ function ocuparMesa() {
     
     const nomeCliente = document.getElementById('cliente-walkin').value.trim();
     const numPessoas = parseInt(document.getElementById('num-pessoas-walkin').value);
-    const mesasNecessarias = calcularMesasNecessarias(numPessoas);
     
-    if (mesasSelecionadas.length !== mesasNecessarias) {
-        alert(`Para ${numPessoas} pessoas, você precisa selecionar exatamente ${mesasNecessarias} mesa${mesasNecessarias > 1 ? 's' : ''}.`);
-        return;
-    }
-    
-    const distribuicao = distribuirPessoas(numPessoas, mesasNecessarias);
-    const horaAtual = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    
-    // Ocupar todas as mesas selecionadas
-    mesasSelecionadas.forEach((mesaId, index) => {
-        const mesa = mesasSimuladas.find(m => m.id === mesaId);
-        mesa.estado = 'Ocupada';
-        mesa.cliente = nomeCliente || 'Cliente não informado';
-        mesa.pessoas = distribuicao[index];
-        mesa.totalPessoas = numPessoas; // Total do grupo
-        mesa.mesasGrupo = mesasSelecionadas.length; // Quantas mesas o grupo ocupa
-        mesa.horaOcupacao = horaAtual;
-        mesa.grupoId = Date.now(); // ID único para o grupo
-    });
-    
-    let mensagem = `Mesa${mesasSelecionadas.length > 1 ? 's' : ''} ${mesasSelecionadas.join(', ')} ocupada${mesasSelecionadas.length > 1 ? 's' : ''} com sucesso!\n\n`;
-    mensagem += `Cliente: ${nomeCliente || 'Não informado'}\n`;
-    mensagem += `Total de pessoas: ${numPessoas}\n`;
-    mensagem += `Mesas ocupadas: ${mesasSelecionadas.length}\n`;
-    
-    if (mesasSelecionadas.length > 1) {
-        mensagem += '\nDistribuição por mesa:\n';
-        mesasSelecionadas.forEach((mesaId, index) => {
-            mensagem += `Mesa ${mesaId}: ${distribuicao[index]} pessoa${distribuicao[index] > 1 ? 's' : ''}\n`;
+    try {
+        const response = await fetch('BackEnd/api/mesas.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                mesas_ids: mesasSelecionadas,
+                cliente_nome: nomeCliente,
+                num_pessoas: numPessoas
+            })
         });
-        mensagem += '\n💡 Lembre-se de unir as mesas no salão!';
+        
+        const data = await response.json();
+        
+        if (data.sucesso) {
+            alert(data.mensagem);
+            cancelarOcupacao();
+            await carregarMesas();
+            await carregarMesasOcupadas();
+        } else {
+            alert('Erro: ' + data.erro);
+        }
+    } catch (error) {
+        console.error('Erro ao ocupar mesa:', error);
+        alert('Erro ao ocupar mesa. Tente novamente.');
     }
-    
-    alert(mensagem);
-    
-    // Resetar formulário
-    cancelarOcupacao();
-    
-    // Atualizar listas
-    carregarMesas();
-    carregarMesasOcupadas();
 }
 
+// Cancelar ocupação
 function cancelarOcupacao() {
     document.getElementById('cliente-walkin').value = '';
     document.getElementById('num-pessoas-walkin').value = '';
@@ -261,7 +334,6 @@ function cancelarOcupacao() {
     mesasSelecionadas = [];
     numPessoasAtual = 0;
     
-    // Remover aviso de cálculo
     const avisoExistente = document.querySelector('.mesas-calculadas');
     if (avisoExistente) {
         avisoExistente.remove();
@@ -270,11 +342,26 @@ function cancelarOcupacao() {
     atualizarBotaoOcupar();
 }
 
-function carregarMesas() {
+// Carregar mesas disponíveis
+async function carregarMesas() {
+    try {
+        const response = await fetch('BackEnd/api/mesas.php?acao=disponiveis');
+        const data = await response.json();
+        
+        if (data.sucesso) {
+            mesasDisponiveis = data.mesas;
+            mostrarMesasDisponiveis(data.mesas);
+        }
+    } catch (error) {
+        console.error('Erro ao carregar mesas:', error);
+    }
+}
+
+// Mostrar mesas disponíveis
+function mostrarMesasDisponiveis(mesas) {
     const mesasGrid = document.getElementById('mesas-grid');
-    const mesasLivres = mesasSimuladas.filter(mesa => mesa.estado === 'Livre');
     
-    mesasGrid.innerHTML = mesasLivres.map(mesa => `
+    mesasGrid.innerHTML = mesas.map(mesa => `
         <div class="mesa-card" onclick="selecionarMesa(${mesa.id})">
             <h4>Mesa ${mesa.id}</h4>
             <p>Capacidade: ${mesa.capacidade}</p>
@@ -283,82 +370,89 @@ function carregarMesas() {
     `).join('');
 }
 
-function carregarMesasOcupadas() {
+// Carregar mesas ocupadas
+async function carregarMesasOcupadas() {
+    try {
+        const response = await fetch('BackEnd/api/mesas.php?acao=ocupadas');
+        const data = await response.json();
+        
+        if (data.sucesso) {
+            mostrarMesasOcupadas(data.mesas);
+        }
+    } catch (error) {
+        console.error('Erro ao carregar mesas ocupadas:', error);
+    }
+}
+
+// Mostrar mesas ocupadas
+function mostrarMesasOcupadas(mesas) {
     const mesasOcupadasLista = document.getElementById('mesas-ocupadas-lista');
-    const mesasOcupadas = mesasSimuladas.filter(mesa => mesa.estado === 'Ocupada');
     
-    if (mesasOcupadas.length === 0) {
+    if (mesas.length === 0) {
         mesasOcupadasLista.innerHTML = '<p>Nenhuma mesa ocupada no momento.</p>';
         return;
     }
     
-    // Agrupar mesas por grupo (mesmo cliente e mesmo horário)
-    const grupos = {};
-    mesasOcupadas.forEach(mesa => {
-        const grupoId = mesa.grupoId || mesa.id;
-        if (!grupos[grupoId]) {
-            grupos[grupoId] = [];
-        }
-        grupos[grupoId].push(mesa);
-    });
-    
-    let html = '';
-    Object.values(grupos).forEach(grupo => {
-        const mesaPrincipal = grupo[0];
-        const totalPessoas = mesaPrincipal.totalPessoas || mesaPrincipal.pessoas;
-        const mesasIds = grupo.map(m => m.id).join(', ');
-        
-        if (grupo.length > 1) {
-            // Grupo de múltiplas mesas
-            html += `
-                <div class="mesa-ocupada-item">
-                    <div class="mesa-ocupada-info">
-                        <h4>Mesas ${mesasIds} (Grupo Unido - ${totalPessoas} pessoas)</h4>
-                        <p><strong>Cliente:</strong> ${mesaPrincipal.cliente}</p>
-                        <p><strong>Ocupadas desde:</strong> ${mesaPrincipal.horaOcupacao}</p>
-                        <p><strong>Distribuição:</strong> ${grupo.map(m => `Mesa ${m.id} (${m.pessoas}p)`).join(', ')}</p>
-                    </div>
-                    <button class="liberar-btn" onclick="liberarGrupoMesas([${grupo.map(m => m.id).join(',')}])">Liberar Grupo</button>
-                </div>
-            `;
-        } else {
-            // Mesa individual
-            const mesa = grupo[0];
-            html += `
-                <div class="mesa-ocupada-item">
-                    <div class="mesa-ocupada-info">
-                        <h4>Mesa ${mesa.id} (${mesa.pessoas} pessoas)</h4>
-                        <p><strong>Cliente:</strong> ${mesa.cliente}</p>
-                        <p><strong>Ocupada desde:</strong> ${mesa.horaOcupacao}</p>
-                    </div>
-                    <button class="liberar-btn" onclick="liberarMesa(${mesa.id})">Liberar Mesa</button>
-                </div>
-            `;
-        }
-    });
-    
-    mesasOcupadasLista.innerHTML = html;
+    mesasOcupadasLista.innerHTML = mesas.map(mesa => `
+        <div class="mesa-ocupada-item">
+            <div class="mesa-ocupada-info">
+                <h4>Mesa ${mesa.id} (${mesa.num_pessoas || 'N/A'} pessoas)</h4>
+                <p><strong>Cliente:</strong> ${mesa.cliente_nome || 'Walk-in'}</p>
+                <p><strong>Data:</strong> ${mesa.data ? new Date(mesa.data).toLocaleDateString('pt-BR') : 'Hoje'}</p>
+                <p><strong>Horário:</strong> ${mesa.hora || 'N/A'}</p>
+            </div>
+            <button class="liberar-btn" onclick="liberarMesa(${mesa.id})">Liberar Mesa</button>
+        </div>
+    `).join('');
 }
 
-function liberarGrupoMesas(mesasIds) {
-    const nomeCliente = mesasSimuladas.find(m => mesasIds.includes(m.id))?.cliente;
+// Liberar mesa
+async function liberarMesa(mesaId) {
+    if (confirm(`Tem certeza que deseja liberar a Mesa ${mesaId}?`)) {
+        try {
+            const response = await fetch('BackEnd/api/mesas.php', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    mesas_ids: [mesaId]
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.sucesso) {
+                alert(data.mensagem);
+                await carregarMesas();
+                await carregarMesasOcupadas();
+            } else {
+                alert('Erro: ' + data.erro);
+            }
+        } catch (error) {
+            console.error('Erro ao liberar mesa:', error);
+            alert('Erro ao liberar mesa. Tente novamente.');
+        }
+    }
+}
+
+// Atualizar placeholder de busca
+function updateSearchPlaceholder() {
+    const tipoBusca = document.getElementById('tipo-busca').value;
+    const campoBusca = document.getElementById('campo-busca');
     
-    if (confirm(`Tem certeza que deseja liberar todas as mesas do grupo de ${nomeCliente}?\nMesas: ${mesasIds.join(', ')}`)) {
-        mesasIds.forEach(mesaId => {
-            const mesa = mesasSimuladas.find(m => m.id === mesaId);
-            mesa.estado = 'Livre';
-            delete mesa.cliente;
-            delete mesa.pessoas;
-            delete mesa.totalPessoas;
-            delete mesa.mesasGrupo;
-            delete mesa.horaOcupacao;
-            delete mesa.grupoId;
-        });
-        
-        alert(`Grupo de mesas ${mesasIds.join(', ')} liberado com sucesso!`);
-        
-        carregarMesas();
-        carregarMesasOcupadas();
+    switch(tipoBusca) {
+        case 'nome':
+            campoBusca.placeholder = 'Digite o nome do cliente...';
+            break;
+        case 'email':
+            campoBusca.placeholder = 'Digite o email do cliente...';
+            break;
+        case 'telefone':
+            campoBusca.placeholder = 'Digite o telefone do cliente...';
+            break;
+        default:
+            campoBusca.placeholder = 'Digite o nome do cliente...';
     }
 }
 
@@ -375,6 +469,3 @@ document.addEventListener('DOMContentLoaded', function() {
         numPessoasInput.addEventListener('change', atualizarCalculoMesas);
     }
 });
-
-// Resto das funções permanecem iguais...
-// [Incluir aqui todas as outras funções que não foram modificadas]
