@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Clientes - Sistema Recepcionista</title>
+    <link rel="stylesheet" href="Css/Universal/nav.css">
+    <link rel="stylesheet" href="Css/Universal/footer.css">
+    <link rel="stylesheet" href="Css/Recepcionista/Recepionist.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="Logotipo">
+                <img src="Fotos/Icondesite.png" alt="Logotipo do Lar da Dona Xinga">
+            </div>
+            <div class="navbar">
+                <button onclick="navigateTo('dashboard-recepcionista.html')">Dashboard</button>
+                <button onclick="navigateTo('mesas-disponuveis.html')">Mesas</button>
+                <button onclick="navigateTo('relatorios.html')">Relatórios</button>
+                <button onclick="navigateTo('login.html')">Sair</button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="gestao-container">
+            <!-- Seção de Busca de Cliente -->
+            <section class="busca-section">
+                <h2>Buscar Cliente</h2>
+                <div class="busca-form">
+                    <div class="form-group">
+                        <label for="tipo-busca">Buscar por:</label>
+                        <select id="tipo-busca" onchange="updateSearchPlaceholder()">
+                            <option value="nome">Nome</option>
+                            <option value="email">Email</option>
+                            <option value="telefone">Telefone</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="campo-busca" placeholder="Digite o nome do cliente..." 
+                               onkeyup="buscarCliente()" autocomplete="off">
+                        <button class="buscar-btn" onclick="buscarCliente()">Buscar</button>
+                    </div>
+                </div>
+                
+                <!-- Resultados da busca -->
+                <div id="resultados-busca" class="resultados-container" style="display: none;">
+                    <h3>Resultados da Busca</h3>
+                    <div id="lista-clientes" class="lista-clientes">
+                        <!-- Resultados serão inseridos aqui dinamicamente -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Seção de Detalhes do Cliente Selecionado -->
+            <section id="detalhes-cliente" class="detalhes-section" style="display: none;">
+                <h2>Detalhes do Cliente</h2>
+                <div class="cliente-info">
+                    <div class="info-card">
+                        <h3 id="cliente-nome">Nome do Cliente</h3>
+                        <p><strong>Email:</strong> <span id="cliente-email"></span></p>
+                        <p><strong>Telefone:</strong> <span id="cliente-telefone"></span></p>
+                        <p><strong>Cliente desde:</strong> <span id="cliente-data"></span></p>
+                    </div>
+                </div>
+
+                <!-- Reservas do Cliente -->
+                <div class="reservas-cliente">
+                    <h3>Reservas do Cliente</h3>
+                    <div class="reservas-filtros">
+                        <button class="filtro-btn active" onclick="filtrarReservas('hoje')">Hoje</button>
+                        <button class="filtro-btn" onclick="filtrarReservas('proximas')">Próximas</button>
+                        <button class="filtro-btn" onclick="filtrarReservas('historico')">Histórico</button>
+                    </div>
+                    <div id="reservas-lista" class="reservas-lista">
+                        <!-- Reservas serão listadas aqui -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Seção de Ocupação de Mesa -->
+            <section class="ocupacao-section">
+                <h2>Ocupar Mesa (Walk-in)</h2>
+                <p>Para clientes sem reserva ou ocupação imediata</p>
+                <p><small><strong>Regra:</strong> Cada mesa acomoda até 4 pessoas. Para grupos maiores, múltiplas mesas serão unidas.</small></p>
+                
+                <div class="ocupacao-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cliente-walkin">Cliente (opcional)</label>
+                            <input type="text" id="cliente-walkin" placeholder="Nome do cliente ou deixe em branco">
+                            <small>Se o cliente estiver cadastrado, será vinculado automaticamente</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="num-pessoas-walkin">Número de Pessoas *</label>
+                            <input type="number" id="num-pessoas-walkin" min="1" max="60" required 
+                                   placeholder="Digite o número de pessoas">
+                            <small>O sistema calculará automaticamente quantas mesas são necessárias</small>
+                        </div>
+                    </div>
+                    
+                    <!-- O cálculo de mesas será inserido aqui dinamicamente -->
+                    
+                    <div class="mesas-disponiveis">
+                        <h3>Mesas Disponíveis</h3>
+                        <div id="mesas-grid" class="mesas-grid">
+                            <!-- Mesas disponíveis serão listadas aqui -->
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button class="ocupar-btn" onclick="ocuparMesa()" disabled>Ocupar Mesa Selecionada</button>
+                        <button class="cancelar-btn" onclick="cancelarOcupacao()">Cancelar</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Seção de Mesas Atualmente Ocupadas -->
+            <section class="mesas-ocupadas-section">
+                <h2>Mesas Atualmente Ocupadas</h2>
+                <div id="mesas-ocupadas-lista" class="mesas-ocupadas-lista">
+                    <!-- Lista de mesas ocupadas -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer-section">
+        <div class="footer-container">
+            <div class="footer-logo">
+                <img src="Fotos/Icondesite.png" alt="Logo do Restaurante">
+                <p>Lar Da Dona Xinga</p>
+            </div>
+            
+            <div class="footer-help">
+                <h3>Precisa de ajuda com sua reserva?</h3>
+                <p>Entre em contato conosco: <a href="mailto:Tomaszinho19@gmail.com">contato@restaurante.com</a></p>
+                <p>Telefone: (+244) 942-761-755</p>
+            </div>
+            <div class="footer-links">
+                <h3>Sistema</h3>
+                <ul>
+                    <li><a href="manual.html">Manual do Sistema</a></li>
+                    <li><a href="ajuda.html">Central de Ajuda</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 Lar Da Dona Xinga</p>
+        </div>
+    </footer>
+
+    <script src="Js/PaginaRecepcão/gestao-cliente.js"></script>
+</body>
+</html>

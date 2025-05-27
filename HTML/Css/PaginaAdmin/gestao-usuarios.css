@@ -1,0 +1,369 @@
+body {
+    padding-top: 120px;
+    background-color: #f5f5f5;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    margin: 0;
+        padding-top: 130px;
+        /* Compensar a navbar fixa */
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 100vh;
+}
+
+.usuarios-main {
+    min-height: calc(100vh - 120px);
+    padding: 20px;
+}
+
+.usuarios-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.usuarios-container h1 {
+    text-align: center;
+    color: #2B341D;
+    margin-bottom: 30px;
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #ddd;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 15px 30px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #666;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s;
+}
+
+.tab-btn.active {
+    color: #667743;
+    border-bottom-color: #667743;
+    font-weight: bold;
+}
+
+.tab-btn:hover {
+    color: #667743;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Header da Seção */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.section-header h2 {
+    color: #2B341D;
+    margin: 0;
+}
+
+.filtros {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.filtros input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 250px;
+}
+
+.filtros button,
+.add-btn {
+    background-color: #667743;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.filtros button:hover,
+.add-btn:hover {
+    background-color: #56653a;
+}
+
+/* Lista de Usuários */
+.usuarios-lista {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.usuario-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.3s;
+}
+
+.usuario-item:hover {
+    background-color: #f9f9f9;
+}
+
+.usuario-item:last-child {
+    border-bottom: none;
+}
+
+.usuario-info h4 {
+    margin: 0 0 5px 0;
+    color: #2B341D;
+}
+
+.usuario-info p {
+    margin: 2px 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.usuario-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-top: 5px;
+    display: inline-block;
+}
+
+.badge-cliente {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.badge-rececionista {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.badge-administrador {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.usuario-acoes {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-detalhes {
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.btn-detalhes:hover {
+    background-color: #138496;
+}
+
+.btn-editar {
+    background-color: #ffc107;
+    color: #212529;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.btn-editar:hover {
+    background-color: #e0a800;
+}
+
+.btn-remover {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.btn-remover:hover {
+    background-color: #c82333;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: black;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #2B341D;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.form-actions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.form-actions button[onclick*="salvar"] {
+    background-color: #28a745;
+    color: white;
+}
+
+.form-actions button[onclick*="salvar"]:hover {
+    background-color: #218838;
+}
+
+.form-actions button[onclick*="fechar"] {
+    background-color: #6c757d;
+    color: white;
+}
+
+.form-actions button[onclick*="fechar"]:hover {
+    background-color: #5a6268;
+}
+
+/* Detalhes do Cliente */
+.cliente-detalhes {
+    line-height: 1.6;
+}
+
+.cliente-detalhes h4 {
+    color: #2B341D;
+    margin: 20px 0 10px 0;
+}
+
+.cliente-detalhes p {
+    margin: 5px 0;
+    color: #666;
+}
+
+.cliente-detalhes strong {
+    color: #2B341D;
+}
+
+/* Estados Vazios */
+.lista-vazia {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .section-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filtros {
+        flex-direction: column;
+    }
+
+    .filtros input {
+        width: 100%;
+    }
+
+    .usuario-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .usuario-acoes {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .tabs {
+        flex-direction: column;
+    }
+
+    .tab-btn {
+        text-align: left;
+        border-bottom: none;
+        border-left: 3px solid transparent;
+    }
+
+    .tab-btn.active {
+        border-left-color: #667743;
+        border-bottom-color: transparent;
+    }
+}

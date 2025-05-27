@@ -1,0 +1,320 @@
+body {
+    background-color: #f7f7ce;
+    font-family: 'Times New Roman', Times, serif;
+    margin: 0;
+    padding-top: 130px;
+    min-height: 100vh;
+}
+
+.perfil-container {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* Seção do Perfil */
+.perfil-section {
+    background-color: #2B341D;
+    color: #f7f7ce;
+    padding: 30px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.perfil-header {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.perfil-foto {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.perfil-foto img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: #ccc;
+    border: 3px solid #f7f7ce;
+}
+
+.trocar-foto-btn {
+    background-color: #a3b76d;
+    color: #333;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: 'Times New Roman', Times, serif;
+    transition: background-color 0.3s;
+}
+
+.trocar-foto-btn:hover {
+    background-color: #7f8f55;
+}
+
+.perfil-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-group label {
+    font-size: 16px;
+    color: #ccc;
+    min-width: 150px;
+}
+
+.form-group input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    font-family: 'Times New Roman', Times, serif;
+    background-color: #fff;
+}
+
+.form-group input:read-only {
+    background-color: #f0f0f0;
+    color: #666;
+}
+
+.form-group input:not(:read-only) {
+    background-color: #fff;
+    border-color: #a3b76d;
+}
+
+.edit-btn {
+    background-color: #a3b76d;
+    color: #333;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.edit-btn:hover {
+    background-color: #7f8f55;
+}
+
+.botoes-acao {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.salvar-btn,
+.cancelar-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: 'Times New Roman', Times, serif;
+    transition: background-color 0.3s;
+}
+
+.salvar-btn {
+    background-color: #a3b76d;
+    color: #333;
+}
+
+.salvar-btn:hover {
+    background-color: #7f8f55;
+}
+
+.cancelar-btn {
+    background-color: #666;
+    color: #fff;
+}
+
+.cancelar-btn:hover {
+    background-color: #555;
+}
+
+/* Seção do Histórico */
+.historico-section {
+    background-color: #f7f7ce;
+    padding: 20px;
+    border-radius: 5px;
+    border: 2px solid #2B341D;
+}
+
+.historico-section h3 {
+    color: #333;
+    font-size: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.historico-header {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.historico-btn {
+    background-color: #2B341D;
+    color: #f7f7ce;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: 'Times New Roman', Times, serif;
+    transition: background-color 0.3s;
+}
+
+.historico-btn:hover,
+.historico-btn.active {
+    background-color: #a3b76d;
+    color: #333;
+}
+
+.reservas-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.reserva-card {
+    background-color: #2B341D;
+    color: #f7f7ce;
+    padding: 20px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.reserva-info p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.reserva-acoes {
+    display: flex;
+    gap: 10px;
+}
+
+.cancelar-reserva,
+.editar-reserva {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: 'Times New Roman', Times, serif;
+    transition: background-color 0.3s;
+}
+
+.editar-reserva {
+    background-color: #a3b76d;
+    color: #333;
+}
+
+.editar-reserva:hover {
+    background-color: #7f8f55;
+}
+
+.cancelar-reserva {
+    background-color: #cc4444;
+    color: #fff;
+}
+
+.cancelar-reserva:hover {
+    background-color: #aa3333;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .perfil-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .form-group {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: left;
+    }
+
+    .form-group label {
+        min-width: auto;
+    }
+
+    .historico-header {
+        flex-direction: column;
+    }
+
+    .reserva-card {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    .perfil-container {
+        margin: 20px 10px;
+        padding: 10px;
+    }
+}
+
+.reserva-acoes button.disabled {
+    background-color: #999 !important;
+    color: #666 !important;
+    cursor: not-allowed !important;
+    opacity: 0.5;
+}
+
+.reserva-acoes button.disabled:hover {
+    background-color: #999 !important;
+}
+
+.tempo-limite {
+    color: #ff6b6b !important;
+    font-size: 12px !important;
+    font-style: italic;
+    margin-top: 5px !important;
+}
+
+.reserva-cancelada {
+    opacity: 0.7;
+    background-color: #f8f8f8;
+}
+
+.status-cancelado {
+    color: #dc3545;
+    font-weight: bold;
+    margin: 5px 0;
+}
+
+.reserva-cancelada .reserva-info {
+    color: #666;
+}
