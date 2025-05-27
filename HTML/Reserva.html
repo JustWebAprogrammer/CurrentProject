@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserva - Lar da Dona Xinga</title>
+    <link rel="stylesheet" href="Css/Universal/nav.css">
+    <link rel="stylesheet" href="Css/Universal/footer.css">
+    <link rel="stylesheet" href="Css/Reserva/reserva.css">
+</head>
+<body>
+     <!-- Verificar se está logado antes de mostrar conteúdo -->
+     <script>
+        // Verificar se está logado
+        fetch('BackEnd/verificar_status_sessao.php')
+            .then(response => response.json())
+            .then(data => {
+                if (!data.logado) {
+                    window.location.href = 'Login.html';
+                }
+            })
+            .catch(() => {
+                window.location.href = 'Login.html';
+            });
+        </script>
+
+    <header>
+        <nav>
+            <div class="Logotipo">
+                <img src="Fotos/Icondesite.png" alt="Logotipo do Lar da Dona Xinga">
+            </div>
+            <div class="navbar">
+                <button aria-label="Acessar suas reservas">Suas Reservas</button>
+                <button aria-label="Ir para a página inicial">Inicio</button>
+                <button aria-label="Fazer logout">Sair</button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="reserva-section">
+            <h2>Fazer uma Reserva</h2>
+            <p>Preencha os detalhes para reservar sua mesa no Lar da Dona Xinga</p>
+            <p id="edit-notice" style="display: none; color: #ccc; font-size: 14px;">
+                Lembre-se: modificações só podem ser feitas até 2 horas antes da reserva.
+            </p>
+            <form id="reserva-form" action="BackEnd/api/reservas.php" method="POST" onsubmit="return validateForm(event)">
+                <div class="form-group">
+                    <label for="num-people">Número de Pessoas</label>
+                    <input type="number" id="num-people" name="num_people" min="1" max="60" required>
+                </div>
+                <div class="form-group">
+                    <label for="reservation-date">Data da Reserva</label>
+                    <input type="date" id="reservation-date" name="reservation_date" min="" max="" required>
+                </div>
+                <div class="form-group">
+                    <label for="reservation-time">Hora da Reserva</label>
+                    <input type="time" id="reservation-time" name="reservation_time" min="" max="" required>
+                </div>
+                <button type="submit">Reservar</button>
+            </form>
+            <div id="error-message" class="error-message"></div>
+        </section>
+    </main>
+
+    <footer class="footer-section">
+        <div class="footer-container">
+            <div class="footer-logo">
+                <img src="Fotos/Icondesite.png" alt="Logo do Restaurante">
+                <p>Lar Da Dona Xinga</p>
+            </div>
+            
+            <div class="footer-help">
+                <h3>Precisa de ajuda com sua reserva?</h3>
+                <p>Entre em contato conosco: <a href="mailto:Tomaszinho19@gmail.com">contato@restaurante.com</a></p>
+                <p>Telefone: (+244) 942-761-755</p>
+            </div>
+            <div class="footer-links">
+                <h3>Dúvidas Frequentes</h3>
+                <ul>
+                    <li><a href="faq.html" title="Página de Perguntas Frequentes">Perguntas Frequentes</a></li>
+                    <li><a href="termos.html" title="Termos de Uso e Política de Privacidade">Termos de Uso e Política de Privacidade</a></li>
+                    <li><a href="contato.html" title="Página de Contato">Fale Conosco</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 Lar Da Dona Xinga. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="Js/PaginaPrincipalReserva/reserva.js"></script>
+    <script src="Js/Universal/nav-dinamico.js"></script>
+
+</body>
+</html>

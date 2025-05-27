@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registro</title>
+    <link rel="stylesheet" href="Css/Universal/nav.css"/>
+    <link rel="stylesheet" href="Css/Cadastrar/registrar.css">
+    <link rel="stylesheet" href="Css/Universal/footer.css">
+</head>
+
+<body>
+ <!-- Navegação -->
+ <nav>
+    <div class="Logotipo">
+        <img src="Fotos/Icondesite.png" alt="Logotipo do Site">
+    </div>
+    <div class="navbar">
+        <button onclick="navigateTo('PaginaIncial.html')">Início</button>
+        <button onclick="navigateTo('Login.html')">Entrar</button>
+    </div>
+</nav>
+
+    <!--Conteudo principal-->
+    <main>
+        <section class="registro-section">
+            <h2>Crie sua Conta</h2>
+            <p>Registre-se para fazer reservas no Lar da Dona Xinga</p>
+            <form id="registro-form" action="BackEnd/api/registro.php" method="POST" onsubmit="return validateregistroForm(event)">
+                <div class="form-group">
+                    <label for="username">Nome de Usuário</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="full-name">Nome Completo</label>
+                    <input type="text" id="full-name" name="full_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Telefone</label>
+                    <div class="phone-input-container">
+                        <span class="country-code">+244</span>
+                        <input type="tel" id="phone" name="phone" placeholder="915 630 555" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" name="password" minlength="6" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Confirmar Senha</label>
+                    <input type="password" id="confirm-password" name="confirm_password" minlength="6" required>
+                </div>
+                <button type="submit">Registrar</button>
+            </form>
+            <div id="error-message" class="error-message"></div>
+        </section>
+    </main>
+    
+    <!--Rodape-->
+    
+    <footer class="footer-section">
+        <div class="footer-container">
+            <div class="footer-logo">
+                <img src="Fotos/Icondesite.png" alt="Logo do Restaurante">
+                <p>Lar Da Dona Xinga</p>
+            </div>
+            
+            <div class="footer-help">
+                <h3>Precisa de ajuda com sua reserva?</h3>
+                <p>Entre em contato conosco: <a href="mailto:Tomaszinho19@gmail.com">contato@restaurante.com</a></p>
+                <p>Telefone: (+244) 942-761-755</p>
+            </div>
+            <div class="footer-links">
+                <h3>Dúvidas Frequentes</h3>
+                <ul>
+                    <li><a href="faq.html">Perguntas Frequentes</a></li>
+                    <li><a href="termos.html">Termos de Uso e Política de Privacidade</a></li>
+                    <li><a href="contato.html">Fale Conosco</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Lar Da Dona Xinga. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+
+    <script src="Js/PaginaRegistro/registro.js"></script>
+    <script>
+        function navigateTo(url) {
+            window.location.href = url;
+        }
+        </script>
+        6.
+</body>
+</html>

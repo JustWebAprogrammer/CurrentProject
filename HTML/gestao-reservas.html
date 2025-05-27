@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Reservas - Dona Xinga</title>
+    <link rel="stylesheet" href="Css/Universal/nav.css">
+    <link rel="stylesheet" href="Css/Universal/footer.css">
+    <link rel="stylesheet" href="Css/PaginaAdmin/gestao-reservas.css">
+</head>
+<body>
+    <nav>
+        <div class="Logotipo">
+            <img src="Fotos/Icondesite.png" alt="Logo Dona Xinga">
+        </div>
+        <div class="navbar">
+            <button onclick="location.href='dashboard.html'">Dashboard</button>
+            <button onclick="location.href='gestao_cliente.html'">Usuários</button>
+            <button onclick="location.href='gestao-reservas.html'">Reservas</button>
+            <button onclick="location.href='relatorios.html'">Relatórios</button>
+            <button onclick="location.href='PaginaIncial.html'">Sair</button>
+        </div>
+    </nav>
+
+    <main class="reservas-main">
+        <div class="reservas-container">
+            <h1>Gestão de Reservas</h1>
+            
+            <!-- Ações -->
+            <div class="section-header">
+                <button class="add-btn" onclick="abrirModalReserva()">Nova Reserva</button>
+                <div class="filtros">
+                    <select id="filtro-reservas" onchange="carregarReservas()">
+                        <option value="todas">Todas as Reservas</option>
+                        <option value="hoje">Reservas de Hoje</option>
+                        <option value="futuras">Reservas Futuras</option>
+                        <option value="passadas">Reservas Passadas</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Lista de Reservas -->
+            <div class="reservas-lista" id="lista-reservas"></div>
+        </div>
+    </main>
+
+    <!-- Modal para Nova Reserva -->
+    <div id="modal-reserva" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModalReserva()">&times;</span>
+            <h2>Nova Reserva</h2>
+            <form id="form-reserva">
+                <div class="form-group">
+                    <label for="cliente-reserva">Cliente:</label>
+                    <select id="cliente-reserva" required>
+                        <option value="">Carregando clientes...</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="data-reserva">Data:</label>
+                    <input type="date" id="data-reserva" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="hora-reserva">Hora:</label>
+                    <select id="hora-reserva" required>
+                        <option value="">Selecione a hora</option>
+                        <option value="12:00">12:00</option>
+                        <option value="12:30">12:30</option>
+                        <option value="13:00">13:00</option>
+                        <option value="13:30">13:30</option>
+                        <option value="14:00">14:00</option>
+                        <option value="19:00">19:00</option>
+                        <option value="19:30">19:30</option>
+                        <option value="20:00">20:00</option>
+                        <option value="20:30">20:30</option>
+                        <option value="21:00">21:00</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="pessoas-reserva">Número de Pessoas:</label>
+                    <select id="pessoas-reserva" required>
+                        <option value="">Selecione</option>
+                        <option value="1">1 pessoa</option>
+                        <option value="2">2 pessoas</option>
+                        <option value="3">3 pessoas</option>
+                        <option value="4">4 pessoas</option>
+                        <option value="5">5 pessoas</option>
+                        <option value="6">6 pessoas</option>
+                        <option value="7">7 pessoas</option>
+                        <option value="8">8 pessoas</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="mesa-reserva">Mesa:</label>
+                    <select id="mesa-reserva" required>
+                        <option value="">Primeiro selecione data, hora e número de pessoas</option>
+                    </select>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" onclick="criarReserva()">Criar Reserva</button>
+                    <button type="button" onclick="fecharModalReserva()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="footer-section">
+        <div class="footer-container">
+            <div class="footer-logo">
+                <img src="Fotos/Icondesite.png" alt="Logo do Restaurante">
+                <p>Lar Da Dona Xinga</p>
+            </div>
+            
+            <div class="footer-help">
+                <h3>Precisa de ajuda?</h3>
+                <p>Entre em contato conosco: <a href="mailto:Tomaszinho19@gmail.com">contato@restaurante.com</a></p>
+                <p>Telefone: (+244) 942-761-755</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Restaurante Dona Xinga - Gestão de Reservas</p>
+        </div>
+    </footer>
+
+    <script src="Js/PaginaAdmin/gestao-reservas.js"></script>
+</body>
+</html>
