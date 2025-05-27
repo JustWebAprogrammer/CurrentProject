@@ -316,6 +316,91 @@ body {
     pointer-events: none;
 }
 
+/* Seção de Reservas Pendentes */
+.reservas-pendentes-section {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.reservas-pendentes-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.reserva-pendente-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 4px solid #ffaa00;
+}
+
+.reserva-pendente-card .reserva-info h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+}
+
+.reserva-pendente-card .reserva-info p {
+    margin: 5px 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.reserva-acoes {
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+}
+
+.btn-concluir,
+.btn-expirar {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    min-width: 100px;
+}
+
+.btn-concluir {
+    background: #28a745;
+    color: white;
+}
+
+.btn-concluir:hover {
+    background: #218838;
+}
+
+.btn-expirar {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-expirar:hover {
+    background: #c82333;
+}
+
+/* Alertas por cor conforme atraso */
+.reserva-pendente-card[style*="ff4444"] {
+    background: #ffebee;
+}
+
+.reserva-pendente-card[style*="ff8800"] {
+    background: #fff3e0;
+}
+
+.reserva-pendente-card[style*="ffaa00"] {
+    background: #fffbf0;
+}
+
 .loading::after {
     content: '';
     position: absolute;

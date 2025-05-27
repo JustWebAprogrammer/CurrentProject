@@ -335,3 +335,164 @@ function debugDashboard() {
     console.log('Estatísticas:', dadosEstatisticas);
     console.log('Intervalos ativos:', intervalosAtualizacao.length);
 }
+
+// Função para verificar e expirar reservas automaticamente
+async function verificarReservasExpiradas() {
+    try {
+        const response = await fetch('BackEnd/api/gerenciar-status-reservas.php?acao=expirar_automatico');
+        const data = await response.json();
+        
+        if (data.sucesso && data.reservas_expiradas > 0) {
+            console.log(`${data.reservas_expiradas} reservas foram expiradas automaticamente`);
+            // Recarregar dados após expiração
+            await carregarEstatisticasReservas();
+        }
+    } catch (error) {
+        console.error('Erro ao verificar reservas expiradas:', error);
+    }
+}
+
+// Função para carregar reservas pendentes (que podem expirar)
+async function carregarReservasPendentes() {
+    try {
+        const response = await fetch('BackEnd/api/gerenciar-status-reservas.php?acao=reservas_pendentes');
+        const data = await response.json();
+        
+        if (data.sucesso) {
+            mostrarReservasPendentes(data.reservas);
+        }
+    } catch (error) {
+        console.error('Erro ao carregar reservas pendentes:', error);
+    }
+}
+
+// Função para mostrar reservas que precisam de atenção
+function mostrarReservasPendentes(reservas) {
+    const container = document.getElementById('reservas-pendentes-lista');
+    if (!container) return;
+    
+    if (!reservas || reservas.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #666;">Nenhuma reserva pendente.</p>';
+        return;
+    }
+    
+    container.innerHTML = reservas.map(reserva => {
+        const minutosAtraso = reserva.minutos_atraso;
+        const statusCor = minutosAtraso > 20 ? '#ff4444' : (minutosAtraso > 10 ? '#ff8800' : '#ffaa00');
+        
+        return `
+            <div class="reserva-pendente-card" style="border-left: 4px solid ${statusCor}">
+                <div class="reserva-info">
+                    <h4>Reserva #${reserva.id} - ${reserva.cliente_nome}</h4>
+                    <p><strong>Horário:</strong> ${reserva.hora}</p>
+                    <p><strong>Mesa:</strong> ${reserva.mesa_id} - <strong>Pessoas:</strong> ${reserva.num_pessoas}</p>
+                    <p><strong>Atraso:</strong> ${minutosAtraso} minutos</p>
+                    <p><strong>Contato:</strong> ${reserva.telemovel}</p>
+                </div>
+                <div class="reserva-acoes">
+                    <button class="btn-concluir" onclick="alterarStatusReserva(${reserva.id}, 'Concluido')">
+                        ✅ Concluir
+                    </button>
+                    <button class="btn-expirar" onclick="alterarStatusReserva(${reserva.id}, 'Expirado')">
+                        ⏰ Expirar
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Função para alterar status da reserva
+async function alterarStatusReserva(reservaId, novoStatus) {
+    if (!confirm(`Tem certeza que deseja marcar esta reserva como ${novoStatus}?`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('BackEnd/api/gerenciar-status-reservas.php', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                reserva_id: reservaId,
+                novo_status: novoStatus
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.sucesso) {
+            mostrarMensagem(data.mensagem, 'success');
+            // Recarregar dados
+            await Promise.all([
+                carregarEstatisticasMesas(),
+                carregarEstatisticasReservas(),
+                carregarReservasPendentes()
+            ]);
+        } else {
+            mostrarMensagem(data.erro || 'Erro ao alterar status', 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao alterar status da reserva:', error);
+        mostrarMensagem('Erro interno do servidor', 'error');
+    }
+}
+
+// Modificar a função de inicialização para incluir verificação de expiração
+async function inicializarDashboard() {
+    try {
+        // Verificar autenticação
+        const autenticado = await verificarAutenticacao();
+        if (!autenticado) return;
+        
+        // Definir data atual
+        definirDataAtual();
+        
+        // Carregar informações do usuário
+        await carregarInformacoesUsuario();
+        
+        // Verificar reservas expiradas primeiro
+        await verificarReservasExpiradas();
+        
+        // Carregar dados iniciais
+        await Promise.all([
+            carregarEstatisticasMesas(),
+            carregarEstatisticasReservas(),
+            carregarReservasPendentes()
+        ]);
+        
+        // Iniciar atualizações automáticas (incluindo verificação de expiração)
+        iniciarAtualizacaoAutomatica();
+        
+        // Atualizar relógio a cada minuto
+        setInterval(definirDataAtual, 60000);
+        
+        console.log('Dashboard do recepcionista carregado com sucesso!');
+        
+    } catch (error) {
+        console.error('Erro ao inicializar dashboard:', error);
+        mostrarMensagem('Erro ao carregar dashboard', 'error');
+    }
+}
+
+// Modificar a função de atualização automática
+function iniciarAtualizacaoAutomatica() {
+    // Atualizar dados a cada 30 segundos
+    const intervalo = setInterval(async () => {
+        try {
+            // Verificar expiração a cada atualização
+            await verificarReservasExpiradas();
+            
+            await Promise.all([
+                carregarEstatisticasMesas(),
+                carregarEstatisticasReservas(),
+                carregarReservasPendentes()
+            ]);
+        } catch (error) {
+            console.error('Erro na atualização automática:', error);
+        }
+    }, 30000);
+    
+    intervalosAtualizacao.push(intervalo);
+}
