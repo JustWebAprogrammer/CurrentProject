@@ -114,21 +114,21 @@ switch($method) {
         }
         break;
 
-    case 'GET':
-        // Verificar se o usuário está logado para GET requests
-        if (!verificarLogin()) {
-            http_response_code(401);
-            echo json_encode(["erro" => "Usuário não autenticado"]);
-            exit;
-        }
-
-        $cliente_logado = obterClienteLogado();
-
-        // Buscar reservas por cliente
-        $filtro = $_GET['filtro'] ?? 'proximas';
-        $reservas = $controller->buscarReservasPorCliente($cliente_logado['id'], $filtro);
-        echo json_encode($reservas);
-        break;
+        case 'GET':
+            // Verificar se o usuário está logado para GET requests
+            if (!verificarLogin()) {
+                http_response_code(401);
+                echo json_encode(["erro" => "Usuário não autenticado"]);
+                exit;
+            }
+        
+            $cliente_logado = obterClienteLogado();
+        
+            // Buscar reservas por cliente
+            $filtro = $_GET['filtro'] ?? 'proximas';
+            $reservas = $controller->buscarReservasPorCliente($cliente_logado['id'], $filtro);
+            echo json_encode($reservas);
+            break;
 
         case 'proximas':
             $query = "SELECT r.*, 

@@ -151,19 +151,17 @@ function displayReservations(reservas) {
             statusMessage = `<p class="tempo-limite">${tempoRestante || 'Não é mais possível editar/cancelar'}</p>`;
         }
         
-        // Mostrar botões apenas para reservas não canceladas
+        // Mostrar botões apenas para reservas ativas e que podem ser modificadas
         let botoesAcoes = '';
-        if (reserva.status !== 'Cancelado') {
+        if (reserva.status === 'Reservado' && podeModificar) {
             botoesAcoes = `
                 <div class="reserva-acoes">
-                    <button class="editar-reserva ${statusClass}" 
-                            onclick="editarReserva(${reserva.id})" 
-                            ${!podeModificar ? 'disabled title="Não é possível editar com menos de 2h de antecedência"' : ''}>
+                    <button class="editar-reserva" 
+                            onclick="editarReserva(${reserva.id})">
                         Editar
                     </button>
-                    <button class="cancelar-reserva ${statusClass}" 
-                            onclick="cancelarReserva(${reserva.id})" 
-                            ${!podeModificar ? 'disabled title="Não é possível cancelar com menos de 2h de antecedência"' : ''}>
+                    <button class="cancelar-reserva" 
+                            onclick="cancelarReserva(${reserva.id})">
                         Cancelar
                     </button>
                 </div>
@@ -184,62 +182,8 @@ function displayReservations(reservas) {
     });
 }
 
-function editarReserva(reservaId) {
-    // Buscar a reserva na lista atual em vez de fazer nova requisição
-    const reservasLista = document.getElementById('reservas-lista');
-    const reservaCards = reservasLista.querySelectorAll('.reserva-card');
-    let reservaData = null;
-    
-    // Encontrar a reserva na lista atual
-    reservaCards.forEach(card => {
-        const botaoEditar = card.querySelector('.editar-reserva');
-        if (botaoEditar && botaoEditar.getAttribute('onclick').includes(reservaId)) {
-            const info = card.querySelector('.reserva-info');
-            const dataText = info.children[0].textContent.replace('Data: ', '');
-            const horaText = info.children[1].textContent.replace('Horário: ', '');
-            const pessoasText = info.children[2].textContent.replace('Pessoas: ', '');
-            
-            reservaData = {
-                id: reservaId,
-                data: dataText,
-                hora: horaText,
-                num_pessoas: pessoasText
-            };
-        }
-    });
-    
-    if (!reservaData) {
-        alert('Erro ao carregar dados da reserva.');
-        return;
-    }
-    
-    if (!canModifyReservation(reservaData.data, reservaData.hora)) {
-        alert('Não é possível editar a reserva com menos de 2 horas de antecedência.');
-        return;
-    }
-    
-    // Converter data para formato YYYY-MM-DD se necessário
-    let dataFormatted = reservaData.data;
-    if (reservaData.data.includes('/')) {
-        const [dia, mes, ano] = reservaData.data.split('/');
-        dataFormatted = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
-    }
-    
-    // Redirecionar para página de reserva com parâmetros de edição
-    const params = new URLSearchParams({
-        edit: 'true',
-        id: reservaData.id,
-        data: dataFormatted,
-        horario: reservaData.hora,
-        pessoas: reservaData.num_pessoas
-    });
-    
-    window.location.href = `Reserva.html?${params.toString()}`;
-}
-
 function cancelarReserva(reservaId) {
     if (confirm('Tem certeza que deseja cancelar esta reserva?')) {
-        // Proceder com o cancelamento
         fetch(`BackEnd/api/reservas.php?reserva_id=${reservaId}`, {
             method: 'DELETE',
             headers: {
@@ -250,7 +194,10 @@ function cancelarReserva(reservaId) {
         .then(data => {
             if (data.sucesso) {
                 alert('Reserva cancelada com sucesso!');
-                loadReservations(); // Recarregar a lista
+                // Recarregar as reservas mantendo o filtro atual
+                const activeButton = document.querySelector('.historico-btn.active');
+                const filtroAtual = activeButton ? getFiltroFromButton(activeButton) : 'proximas';
+                loadReservations(filtroAtual);
             } else {
                 alert('Erro ao cancelar reserva: ' + (data.erro || 'Erro desconhecido'));
             }
@@ -259,6 +206,17 @@ function cancelarReserva(reservaId) {
             console.error('Erro:', error);
             alert('Erro de conexão. Tente novamente.');
         });
+    }
+}
+
+// Função auxiliar para obter o filtro do botão
+function getFiltroFromButton(button) {
+    const texto = button.textContent.toLowerCase();
+    switch(texto) {
+        case 'próximas': return 'proximas';
+        case 'passadas': return 'passadas';
+        case 'canceladas': return 'canceladas';
+        default: return 'proximas';
     }
 }
 

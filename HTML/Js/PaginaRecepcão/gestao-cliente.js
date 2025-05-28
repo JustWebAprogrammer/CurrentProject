@@ -205,7 +205,7 @@ function mostrarReservasCliente(reservas) {
                 <p><strong>Data:</strong> ${formatarData(reserva.data)}</p>
                 <p><strong>Horário:</strong> ${reserva.hora}</p>
                 <p><strong>Pessoas:</strong> ${reserva.num_pessoas}</p>
-                <p><strong>Mesa:</strong> ${reserva.mesa_id}</p>
+                <p><strong>Mesa(s):</strong> ${reserva.mesa_info || (reserva.mesa_id ? `Mesa ${reserva.mesa_id}` : `${Math.ceil(reserva.num_pessoas / 4)} mesa(s)`)}</p>
             </div>
             <span class="status-badge ${getStatusClass(reserva.status)}">${reserva.status}</span>
         </div>

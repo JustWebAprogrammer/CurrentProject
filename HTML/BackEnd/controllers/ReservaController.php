@@ -323,14 +323,15 @@ private function criarMesasAdicionais($dados, $mesasDisponiveis, $mesasAtuais, $
             break;
             
         case 'historico':
+        case 'passadas': // Adicionar suporte para ambos os nomes
             $query = "SELECT r.*, 
                              r.mesas_necessarias as total_mesas,
                              'N/A' as capacidade
                       FROM reservas r 
                       WHERE r.cliente_id = :cliente_id 
+                      AND r.status IN ('Concluído', 'Reservado') 
                       AND r.num_pessoas > 0
-                      AND (r.status = 'Concluído' OR 
-                           (r.status = 'Reservado' AND (r.data < :hoje OR (r.data = :hoje AND r.hora < :agora))))
+                      AND (r.data < :hoje OR (r.data = :hoje AND r.hora < :agora))
                       ORDER BY r.data DESC, r.hora DESC";
             break;
             
@@ -360,9 +361,9 @@ private function criarMesasAdicionais($dados, $mesasDisponiveis, $mesasAtuais, $
     $stmt = $this->db->prepare($query);
     $stmt->bindParam(":cliente_id", $cliente_id);
     
-    if ($filtro === 'hoje') {
+    if (in_array($filtro, ['hoje'])) {
         $stmt->bindParam(":hoje", $hoje);
-    } elseif ($filtro === 'proximas' || $filtro === 'historico') {
+    } elseif (in_array($filtro, ['proximas', 'historico', 'passadas'])) {
         $stmt->bindParam(":hoje", $hoje);
         $stmt->bindParam(":agora", $agora);
     }
@@ -373,9 +374,19 @@ private function criarMesasAdicionais($dados, $mesasDisponiveis, $mesasAtuais, $
         'sucesso' => true,
         'reservas' => $stmt->fetchAll(PDO::FETCH_ASSOC)
     ];
+
 }
 
 public function cancelarReserva($reserva_id) {
+  // Debug: verificar se a reserva existe
+    $query_check = "SELECT * FROM reservas WHERE id = :id";
+    $stmt_check = $this->db->prepare($query_check);
+    $stmt_check->bindParam(":id", $reserva_id);
+    $stmt_check->execute();
+    $reserva_atual = $stmt_check->fetch(PDO::FETCH_ASSOC);
+    
+    error_log("Cancelando reserva ID: " . $reserva_id . " Status atual: " . ($reserva_atual['status'] ?? 'Não encontrada'));
+    
     // Cancelar a reserva principal
     $query = "UPDATE reservas SET status = 'Cancelado' WHERE id = :id";
     $stmt = $this->db->prepare($query);
@@ -388,11 +399,14 @@ public function cancelarReserva($reserva_id) {
         $stmt_aux->bindParam(":reserva_id", $reserva_id);
         $stmt_aux->execute();
         
+        error_log("Reserva cancelada com sucesso - Linhas afetadas: " . $stmt->rowCount());
+        
         return [
             'sucesso' => true,
             'mensagem' => 'Reserva cancelada com sucesso!'
         ];
     } else {
+        error_log("Erro ao cancelar reserva - Erro SQL: " . print_r($stmt->errorInfo(), true));
         return [
             'sucesso' => false,
             'erro' => 'Erro ao cancelar reserva.'
