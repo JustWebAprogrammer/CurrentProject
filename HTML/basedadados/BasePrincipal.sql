@@ -70,4 +70,22 @@ ALTER TABLE reservas ADD COLUMN reserva_principal_id INT NULL;
 ALTER TABLE reservas ADD FOREIGN KEY (reserva_principal_id) REFERENCES reservas(id);
 
 
-Select * From reservas;
+Select * From clientes;
+
+
+-- Adicionar coluna para armazenar quantas mesas a reserva ocupa
+ALTER TABLE reservas ADD COLUMN mesas_necessarias INT NOT NULL DEFAULT 1;
+
+-- Remover a obrigatoriedade de mesa_id (permitir NULL)
+ALTER TABLE reservas MODIFY COLUMN mesa_id INT NULL;
+
+-- Remover foreign key se existir problema
+ALTER TABLE reservas DROP FOREIGN KEY reservas_ibfk_2;
+ALTER TABLE reservas ADD FOREIGN KEY (mesa_id) REFERENCES mesas(id) ON DELETE SET NULL;
+
+-- Adicionar novos status se ainda não existirem
+ALTER TABLE reservas MODIFY COLUMN status ENUM('Reservado', 'Confirmado', 'Concluido', 'Cancelado', 'Expirado') DEFAULT 'Reservado';
+
+-- Adicionar campo para controle de tempo (se não existir)
+ALTER TABLE reservas ADD COLUMN tempo_chegada DATETIME NULL;
+ALTER TABLE reservas ADD COLUMN tempo_expiracao DATETIME NULL;

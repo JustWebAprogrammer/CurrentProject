@@ -298,15 +298,11 @@ private function criarMesasAdicionais($dados, $mesasDisponiveis, $mesasAtuais, $
     $agora = date('H:i:s');
     
     switch($filtro) {
-
         case 'hoje':
-            // NOVO: Filtro para reservas de hoje
-            $query = "SELECT r.*, m.capacidade,
-                             (SELECT COUNT(*) FROM reservas r2 
-                              WHERE (r2.reserva_principal_id = r.id OR r2.id = r.id) 
-                              AND r2.status IN ('Reservado', 'Auxiliar')) as total_mesas
+            $query = "SELECT r.*, 
+                             r.mesas_necessarias as total_mesas,
+                             'N/A' as capacidade
                       FROM reservas r 
-                      LEFT JOIN mesas m ON r.mesa_id = m.id 
                       WHERE r.cliente_id = :cliente_id 
                       AND r.status IN ('Reservado', 'Concluído')
                       AND r.num_pessoas > 0
@@ -315,12 +311,10 @@ private function criarMesasAdicionais($dados, $mesasDisponiveis, $mesasAtuais, $
             break;
 
         case 'proximas':
-            $query = "SELECT r.*, m.capacidade,
-                             (SELECT COUNT(*) FROM reservas r2 
-                              WHERE (r2.reserva_principal_id = r.id OR r2.id = r.id) 
-                              AND r2.status IN ('Reservado', 'Auxiliar')) as total_mesas
+            $query = "SELECT r.*, 
+                             r.mesas_necessarias as total_mesas,
+                             'N/A' as capacidade
                       FROM reservas r 
-                      JOIN mesas m ON r.mesa_id = m.id 
                       WHERE r.cliente_id = :cliente_id 
                       AND r.status = 'Reservado'
                       AND r.num_pessoas > 0
@@ -328,28 +322,23 @@ private function criarMesasAdicionais($dados, $mesasDisponiveis, $mesasAtuais, $
                       ORDER BY r.data ASC, r.hora ASC";
             break;
             
-            case 'historico':
-                // CORRIGIDO: mudei de 'passadas' para 'historico' para coincidir com o JS
-                $query = "SELECT r.*, m.capacidade,
-                                 (SELECT COUNT(*) FROM reservas r2 
-                                  WHERE (r2.reserva_principal_id = r.id OR r2.id = r.id) 
-                                  AND r2.status IN ('Reservado', 'Auxiliar', 'Concluído')) as total_mesas
-                          FROM reservas r 
-                          LEFT JOIN mesas m ON r.mesa_id = m.id 
-                          WHERE r.cliente_id = :cliente_id 
-                          AND r.num_pessoas > 0
-                          AND (r.status = 'Concluído' OR 
-                               (r.status = 'Reservado' AND (r.data < :hoje OR (r.data = :hoje AND r.hora < :agora))))
-                          ORDER BY r.data DESC, r.hora DESC";
-                break;
+        case 'historico':
+            $query = "SELECT r.*, 
+                             r.mesas_necessarias as total_mesas,
+                             'N/A' as capacidade
+                      FROM reservas r 
+                      WHERE r.cliente_id = :cliente_id 
+                      AND r.num_pessoas > 0
+                      AND (r.status = 'Concluído' OR 
+                           (r.status = 'Reservado' AND (r.data < :hoje OR (r.data = :hoje AND r.hora < :agora))))
+                      ORDER BY r.data DESC, r.hora DESC";
+            break;
             
         case 'canceladas':
-            $query = "SELECT r.*, m.capacidade,
-                             (SELECT COUNT(*) FROM reservas r2 
-                              WHERE (r2.reserva_principal_id = r.id OR r2.id = r.id) 
-                              AND r2.status = 'Cancelado') as total_mesas
+            $query = "SELECT r.*, 
+                             r.mesas_necessarias as total_mesas,
+                             'N/A' as capacidade
                       FROM reservas r 
-                      JOIN mesas m ON r.mesa_id = m.id 
                       WHERE r.cliente_id = :cliente_id 
                       AND r.status = 'Cancelado'
                       AND r.num_pessoas > 0
@@ -357,19 +346,16 @@ private function criarMesasAdicionais($dados, $mesasDisponiveis, $mesasAtuais, $
             break;
             
         default:
-             // Default volta a 'proximas'
-             $query = "SELECT r.*, m.capacidade,
-             (SELECT COUNT(*) FROM reservas r2 
-              WHERE (r2.reserva_principal_id = r.id OR r2.id = r.id) 
-              AND r2.status IN ('Reservado', 'Auxiliar')) as total_mesas
-      FROM reservas r 
-      LEFT JOIN mesas m ON r.mesa_id = m.id 
-      WHERE r.cliente_id = :cliente_id 
-      AND r.status = 'Reservado'
-      AND r.num_pessoas > 0
-      AND (r.data > :hoje OR (r.data = :hoje AND r.hora >= :agora))
-      ORDER BY r.data ASC, r.hora ASC";   
-      }
+            $query = "SELECT r.*, 
+                             r.mesas_necessarias as total_mesas,
+                             'N/A' as capacidade
+                      FROM reservas r 
+                      WHERE r.cliente_id = :cliente_id 
+                      AND r.status = 'Reservado'
+                      AND r.num_pessoas > 0
+                      AND (r.data > :hoje OR (r.data = :hoje AND r.hora >= :agora))
+                      ORDER BY r.data ASC, r.hora ASC";   
+    }
     
     $stmt = $this->db->prepare($query);
     $stmt->bindParam(":cliente_id", $cliente_id);
