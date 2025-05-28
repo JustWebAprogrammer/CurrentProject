@@ -294,6 +294,9 @@ private function criarMesasAdicionais($dados, $mesasDisponiveis, $mesasAtuais, $
 
     // MÉTODO ATUALIZADO PARA INCLUIR FILTRO
    public function buscarReservasPorCliente($cliente_id, $filtro = 'proximas') {
+    // Primeiro, atualizar reservas expiradas
+    $this->atualizarReservasExpiradas();
+    
     $hoje = date('Y-m-d');
     $agora = date('H:i:s');
     
@@ -304,7 +307,7 @@ private function criarMesasAdicionais($dados, $mesasDisponiveis, $mesasAtuais, $
                              'N/A' as capacidade
                       FROM reservas r 
                       WHERE r.cliente_id = :cliente_id 
-                      AND r.status IN ('Reservado', 'Concluído')
+                      AND r.status IN ('Reservado', 'Concluído', 'Expirado')
                       AND r.num_pessoas > 0
                       AND DATE(r.data) = :hoje
                       ORDER BY r.hora ASC";
@@ -323,15 +326,14 @@ private function criarMesasAdicionais($dados, $mesasDisponiveis, $mesasAtuais, $
             break;
             
         case 'historico':
-        case 'passadas': // Adicionar suporte para ambos os nomes
+        case 'passadas':
             $query = "SELECT r.*, 
                              r.mesas_necessarias as total_mesas,
                              'N/A' as capacidade
                       FROM reservas r 
                       WHERE r.cliente_id = :cliente_id 
-                      AND r.status IN ('Concluído', 'Reservado') 
+                      AND r.status IN ('Concluído', 'Expirado') 
                       AND r.num_pessoas > 0
-                      AND (r.data < :hoje OR (r.data = :hoje AND r.hora < :agora))
                       ORDER BY r.data DESC, r.hora DESC";
             break;
             
@@ -363,7 +365,7 @@ private function criarMesasAdicionais($dados, $mesasDisponiveis, $mesasAtuais, $
     
     if (in_array($filtro, ['hoje'])) {
         $stmt->bindParam(":hoje", $hoje);
-    } elseif (in_array($filtro, ['proximas', 'historico', 'passadas'])) {
+    } elseif (in_array($filtro, ['proximas'])) {
         $stmt->bindParam(":hoje", $hoje);
         $stmt->bindParam(":agora", $agora);
     }
@@ -374,7 +376,6 @@ private function criarMesasAdicionais($dados, $mesasDisponiveis, $mesasAtuais, $
         'sucesso' => true,
         'reservas' => $stmt->fetchAll(PDO::FETCH_ASSOC)
     ];
-
 }
 
 public function cancelarReserva($reserva_id) {
@@ -412,6 +413,35 @@ public function cancelarReserva($reserva_id) {
             'erro' => 'Erro ao cancelar reserva.'
         ];
     }
+}
+
+public function atualizarReservasExpiradas() {
+    $hoje = date('Y-m-d');
+    $agora = date('H:i:s');
+    
+    // Atualizar reservas que já passaram do horário
+    $query = "UPDATE reservas 
+              SET status = 'Expirado' 
+              WHERE status = 'Reservado' 
+              AND (data < :hoje OR (data = :hoje AND hora < :agora))";
+    
+    $stmt = $this->db->prepare($query);
+    $stmt->bindParam(":hoje", $hoje);
+    $stmt->bindParam(":agora", $agora);
+    
+    if ($stmt->execute()) {
+        $linhasAfetadas = $stmt->rowCount();
+        error_log("Reservas expiradas atualizadas: " . $linhasAfetadas);
+        return [
+            'sucesso' => true,
+            'reservas_atualizadas' => $linhasAfetadas
+        ];
+    }
+    
+    return [
+        'sucesso' => false,
+        'erro' => 'Erro ao atualizar reservas expiradas'
+    ];
 }
 
 private function validarDadosReserva($dados) {

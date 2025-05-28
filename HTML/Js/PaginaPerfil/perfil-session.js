@@ -131,24 +131,40 @@ function displayReservations(reservas) {
 
     reservas.forEach((reserva) => {
         const dataFormatada = formatarData(reserva.data);
-        const podeModificar = canModifyReservation(reserva.data, reserva.hora) && reserva.status !== 'Cancelado';
+        const podeModificar = canModifyReservation(reserva.data, reserva.hora) && 
+                             reserva.status === 'Reservado'; // Só pode modificar se estiver "Reservado"
         const tempoRestante = formatTimeRemaining(reserva.data, reserva.hora);
         
         const reservaCard = document.createElement('div');
         reservaCard.className = 'reserva-card';
         
-        // Adicionar classe para reservas canceladas
+        // Adicionar classes baseadas no status
         if (reserva.status === 'Cancelado') {
             reservaCard.classList.add('reserva-cancelada');
+        } else if (reserva.status === 'Expirado') {
+            reservaCard.classList.add('reserva-expirada');
         }
         
-        const statusClass = podeModificar ? '' : 'disabled';
         let statusMessage = '';
+        let statusClass = '';
         
-        if (reserva.status === 'Cancelado') {
-            statusMessage = '<p class="status-cancelado">Reserva cancelada</p>';
-        } else if (!podeModificar && reserva.status !== 'Cancelado') {
-            statusMessage = `<p class="tempo-limite">${tempoRestante || 'Não é mais possível editar/cancelar'}</p>`;
+        switch(reserva.status) {
+            case 'Cancelado':
+                statusMessage = '<p class="status-cancelado">Reserva cancelada</p>';
+                statusClass = 'status-cancelado';
+                break;
+            case 'Expirado':
+                statusMessage = '<p class="status-expirado">Reserva expirada</p>';
+                statusClass = 'status-expirado';
+                break;
+            case 'Concluído':
+                statusMessage = '<p class="status-concluido">Reserva concluída</p>';
+                statusClass = 'status-concluido';
+                break;
+            default:
+                if (!podeModificar && reserva.status === 'Reservado') {
+                    statusMessage = `<p class="tempo-limite">${tempoRestante || 'Não é mais possível editar/cancelar'}</p>`;
+                }
         }
         
         // Mostrar botões apenas para reservas ativas e que podem ser modificadas
@@ -173,7 +189,7 @@ function displayReservations(reservas) {
                 <p><strong>Data:</strong> ${dataFormatada}</p>
                 <p><strong>Horário:</strong> ${reserva.hora}</p>
                 <p><strong>Pessoas:</strong> ${reserva.num_pessoas}</p>
-                <p><strong>Status:</strong> ${reserva.status}</p>
+                <p><strong>Status:</strong> <span class="${statusClass}">${reserva.status}</span></p>
                 ${statusMessage}
             </div>
             ${botoesAcoes}

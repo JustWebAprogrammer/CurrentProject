@@ -25,6 +25,19 @@ if ($method === 'POST' && isset($_POST['_method']) && $_POST['_method'] === 'PUT
 }
 
 switch($method) {
+
+    case 'PATCH':
+        // Atualizar reservas expiradas manualmente
+        if (isset($_GET['action']) && $_GET['action'] === 'atualizar_expiradas') {
+            $resultado = $controller->atualizarReservasExpiradas();
+            echo json_encode($resultado);
+        } else {
+            http_response_code(400);
+            echo json_encode(["erro" => "Ação não especificada"]);
+        }
+        break;
+
+
     case 'POST':
         try {
             // Verificar se o usuário está logado

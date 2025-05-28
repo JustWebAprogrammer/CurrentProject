@@ -318,3 +318,24 @@ body {
 .reserva-cancelada .reserva-info {
     color: #666;
 }
+
+.reserva-expirada {
+    background-color: #bea5a3;
+    border-left: 4px solid #E57373;
+}
+
+.status-expirado {
+    color: #C62828;
+    font-weight: bold;
+    font-style: italic;
+}
+
+.status-concluido {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.status-cancelado {
+    color: #dc3545;
+    font-weight: bold;
+}
