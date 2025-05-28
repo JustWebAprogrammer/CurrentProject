@@ -169,20 +169,25 @@ function mostrarDetalhesCliente(cliente) {
 // Carregar reservas do cliente
 async function carregarReservasCliente(clienteId) {
     try {
-          // CORREÇÃO: Usar o endpoint correto no buscar-clientes.php
-          const response = await fetch(`BackEnd/api/buscar-clientes.php?acao=reservas&cliente_id=${clienteId}&filtro=${filtroReservaAtual}`);
-          const data = await response.json();
-          
-          if (data.sucesso) {
-              mostrarReservasCliente(data.reservas);
-          } else {
-              document.getElementById('reservas-lista').innerHTML = '<p>Erro ao carregar reservas do cliente.</p>';
-              console.error('Erro ao carregar reservas:', data.erro);
-          }
-      } catch (error) {
-          console.error('Erro ao carregar reservas:', error);
-          document.getElementById('reservas-lista').innerHTML = '<p>Erro de conexão ao carregar reservas.</p>';
-      }
+         // Debug: verificar qual filtro está sendo enviado
+        console.log('Carregando reservas com filtro:', filtroReservaAtual);
+        
+        const response = await fetch(`BackEnd/api/buscar-clientes.php?acao=reservas&cliente_id=${clienteId}&filtro=${filtroReservaAtual}`);
+        const data = await response.json();
+        
+        // Debug: verificar resposta do servidor
+        console.log('Resposta do servidor:', data);
+        
+        if (data.sucesso) {
+            mostrarReservasCliente(data.reservas);
+        } else {
+            document.getElementById('reservas-lista').innerHTML = '<p>Erro ao carregar reservas do cliente.</p>';
+            console.error('Erro ao carregar reservas:', data.erro);
+        }
+    } catch (error) {
+        console.error('Erro ao carregar reservas:', error);
+        document.getElementById('reservas-lista').innerHTML = '<p>Erro de conexão ao carregar reservas.</p>';
+    }
   }
 // Mostrar reservas do cliente
 function mostrarReservasCliente(reservas) {
@@ -213,7 +218,14 @@ function filtrarReservas(filtro) {
     document.querySelectorAll('.filtro-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    event.target.classList.add('active');
+    
+    // Encontrar o botão clicado e marcá-lo como ativo
+    const botaoClicado = Array.from(document.querySelectorAll('.filtro-btn')).find(btn => 
+        btn.getAttribute('onclick').includes(`'${filtro}'`)
+    );
+    if (botaoClicado) {
+        botaoClicado.classList.add('active');
+    }
     
     filtroReservaAtual = filtro;
     
