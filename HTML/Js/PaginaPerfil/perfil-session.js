@@ -198,6 +198,83 @@ function displayReservations(reservas) {
     });
 }
 
+function editarReserva(reservaId) {
+    // Buscar a reserva na lista atual em vez de fazer nova requisição
+    const reservasLista = document.getElementById('reservas-lista');
+    const reservaCards = reservasLista.querySelectorAll('.reserva-card');
+    let reservaData = null;
+    
+    // Encontrar a reserva na lista atual
+    reservaCards.forEach(card => {
+        const botaoEditar = card.querySelector('.editar-reserva');
+        if (botaoEditar && botaoEditar.getAttribute('onclick').includes(reservaId)) {
+            const info = card.querySelector('.reserva-info');
+            const paragrafos = info.querySelectorAll('p');
+            
+            // Extrair dados de forma mais robusta
+            let data, hora, numPessoas;
+            
+            paragrafos.forEach(p => {
+                const texto = p.textContent || p.innerText;
+                if (texto.includes('Data:')) {
+                    data = texto.replace('Data:', '').trim();
+                } else if (texto.includes('Horário:')) {
+                    hora = texto.replace('Horário:', '').trim();
+                } else if (texto.includes('Pessoas:')) {
+                    numPessoas = texto.replace('Pessoas:', '').trim();
+                }
+            });
+            
+            if (data && hora && numPessoas) {
+                reservaData = {
+                    id: reservaId,
+                    data: data,
+                    hora: hora,
+                    num_pessoas: parseInt(numPessoas)
+                };
+            }
+        }
+    });
+    
+    if (!reservaData) {
+        alert('Erro ao carregar dados da reserva.');
+        console.error('Dados da reserva não encontrados para ID:', reservaId);
+        return;
+    }
+    
+    // Verificar se ainda pode ser editada
+    if (!canModifyReservation(reservaData.data, reservaData.hora)) {
+        alert('Não é possível editar a reserva com menos de 2 horas de antecedência.');
+        return;
+    }
+    
+    // Converter data para formato YYYY-MM-DD se necessário
+    let dataFormatted = reservaData.data;
+    if (reservaData.data.includes('/')) {
+        const [dia, mes, ano] = reservaData.data.split('/');
+        dataFormatted = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
+    }
+    
+    // Debug para verificar os dados
+    console.log('Dados da reserva para edição:', {
+        id: reservaData.id,
+        data: dataFormatted,
+        hora: reservaData.hora,
+        pessoas: reservaData.num_pessoas
+    });
+    
+    // Redirecionar para página de reserva com parâmetros de edição
+    const params = new URLSearchParams({
+        edit: 'true',
+        id: reservaData.id,
+        data: dataFormatted,
+        horario: reservaData.hora,
+        pessoas: reservaData.num_pessoas
+    });
+    
+    window.location.href = `Reserva.html?${params.toString()}`;
+}
+
 function cancelarReserva(reservaId) {
     if (confirm('Tem certeza que deseja cancelar esta reserva?')) {
         fetch(`BackEnd/api/reservas.php?reserva_id=${reservaId}`, {
@@ -287,4 +364,39 @@ function formatarData(data) {
         return `${partes[2]}/${partes[1]}/${partes[0]}`;
     }
     return data; // Se já está no formato correto
+}
+function editarReserva(reservaId) {
+    // Buscar dados da reserva para edição
+    fetch(`BackEnd/api/reservas.php?reserva_id=${reservaId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.sucesso && data.reservas && data.reservas.length > 0) {
+            const reserva = data.reservas.find(r => r.id == reservaId);
+            if (reserva) {
+                // Redirecionar para página de reserva em modo de edição
+                const params = new URLSearchParams({
+                    edit: 'true',
+                    id: reserva.id,
+                    data: reserva.data,
+                    horario: reserva.hora,
+                    pessoas: reserva.num_pessoas
+                });
+                
+                window.location.href = `Reserva.html?${params.toString()}`;
+            } else {
+                alert('Reserva não encontrada.');
+            }
+        } else {
+            alert('Erro ao carregar dados da reserva: ' + (data.erro || 'Erro desconhecido'));
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao buscar reserva:', error);
+        alert('Erro de conexão. Tente novamente.');
+    });
 }
