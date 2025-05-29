@@ -78,6 +78,7 @@ function carregarClientes(busca = '') {
                     </div>
                     <div class="usuario-acoes">
                         <button class="btn-detalhes" onclick="verDetalhesCliente(${cliente.id})">Detalhes</button>
+                        <button class="btn-remover" onclick="apagarCliente(${cliente.id}, '${cliente.nome}')">Apagar</button>
                     </div>
                 `;
                 container.appendChild(clienteDiv);
@@ -222,9 +223,97 @@ function removerUsuario(id) {
 }
 
 function verDetalhesCliente(clienteId) {
-    // Aqui você pode implementar a visualização de detalhes do cliente
-    // Por agora, vamos apenas mostrar um alerta
-    alert('Funcionalidade de detalhes do cliente em desenvolvimento');
+    // Buscar detalhes completos do cliente
+    fetch(`BackEnd/api/admin-usuarios.php?acao=detalhes_cliente&cliente_id=${clienteId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.erro) {
+                alert('Erro ao carregar detalhes do cliente: ' + data.erro);
+                return;
+            }
+            
+            // Preencher o modal com os dados do cliente
+            const cliente = data.cliente;
+            const reservas = data.reservas || [];
+            
+            document.getElementById('detalhe-nome').textContent = cliente.nome;
+            document.getElementById('detalhe-email').textContent = cliente.email;
+            document.getElementById('detalhe-telefone').textContent = cliente.telemovel;
+            document.getElementById('detalhe-data-cadastro').textContent = new Date(cliente.data_criacao).toLocaleDateString();
+            document.getElementById('detalhe-total-reservas').textContent = reservas.length;
+            
+            // Mostrar histórico de reservas
+            const historicoContainer = document.getElementById('historico-reservas');
+            historicoContainer.innerHTML = '';
+            
+            if (reservas.length === 0) {
+                historicoContainer.innerHTML = '<p>Nenhuma reserva encontrada.</p>';
+            } else {
+                reservas.forEach(reserva => {
+                    const reservaDiv = document.createElement('div');
+                    reservaDiv.className = 'reserva-historico';
+                    
+                    const statusClass = getStatusClassDetalhes(reserva.status);
+                    const dataFormatada = new Date(reserva.data).toLocaleDateString();
+                    
+                    reservaDiv.innerHTML = `
+                        <div class="reserva-info-detalhes">
+                            <p><strong>Data:</strong> ${dataFormatada} às ${reserva.hora}</p>
+                            <p><strong>Mesa:</strong> ${reserva.mesa_id || 'N/A'} | <strong>Pessoas:</strong> ${reserva.num_pessoas}</p>
+                            <span class="status-badge ${statusClass}">${reserva.status}</span>
+                        </div>
+                    `;
+                    historicoContainer.appendChild(reservaDiv);
+                });
+            }
+            
+            // Mostrar o modal
+            document.getElementById('modal-cliente').style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Erro ao carregar detalhes do cliente:', error);
+            alert('Erro ao carregar detalhes do cliente');
+        });
+}
+
+function getStatusClassDetalhes(status) {
+    switch(status) {
+        case 'Reservado': return 'status-reservado';
+        case 'Concluído': return 'status-concluido';
+        case 'Cancelado': return 'status-cancelado';
+        case 'Expirado': return 'status-expirado';
+        default: return '';
+    }
+}
+
+function apagarCliente(clienteId, nomeCliente) {
+    if (!confirm(`Tem certeza que deseja apagar o cliente "${nomeCliente}"?\n\nAtenção: Esta ação irá:\n- Apagar permanentemente o cliente\n- Cancelar todas as reservas ativas\n- Esta ação não pode ser desfeita!`)) {
+        return;
+    }
+    
+    // Segunda confirmação para ações críticas
+    if (!confirm(`CONFIRMAÇÃO FINAL:\n\nVocê está prestes a apagar PERMANENTEMENTE o cliente "${nomeCliente}" e todas as suas reservas.\n\nEsta ação é IRREVERSÍVEL!\n\nDeseja continuar?`)) {
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('acao', 'apagar_cliente');
+    formData.append('cliente_id', clienteId);
+    
+    fetch('BackEnd/api/admin-usuarios.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        // Como a resposta redireciona, aguardar e recarregar
+        setTimeout(() => {
+            window.location.reload();
+        }, 100);
+    })
+    .catch(error => {
+        console.error('Erro ao apagar cliente:', error);
+        alert('Erro ao apagar cliente. Tente novamente.');
+    });
 }
 
 function fecharModalCliente() {

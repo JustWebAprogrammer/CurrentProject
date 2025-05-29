@@ -367,3 +367,56 @@ body {
         border-bottom-color: transparent;
     }
 }
+
+.btn-remover {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: 5px;
+}
+
+.btn-remover:hover {
+    background-color: #c82333;
+}
+
+.btn-remover:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+#modal-cliente {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+#modal-cliente .modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 600px;
+    border-radius: 8px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+#detalhes-cliente ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+#detalhes-cliente li {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
