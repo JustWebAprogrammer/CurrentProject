@@ -39,6 +39,18 @@ try {
                     header('Content-Type: application/json');
                     echo json_encode($controller->obterClientes($busca));
                     break;
+
+                    case 'detalhes_cliente':
+                        $cliente_id = $_GET['cliente_id'] ?? 0;
+                        if ($cliente_id < 1) {
+                            header('Content-Type: application/json');
+                            echo json_encode(['erro' => 'ID do cliente inválido']);
+                            exit;
+                        }
+                        
+                        header('Content-Type: application/json');
+                        echo json_encode($controller->obterDetalhesCliente($cliente_id));
+                        break;
                     
                 case 'usuarios_sistema':
                     header('Content-Type: application/json');
@@ -87,6 +99,23 @@ try {
                         header("Location: ../../gestao_cliente.html?erro=" . urlencode($resultado['erro']));
                     }
                     exit;
+
+                    case 'apagar_cliente':
+                        $cliente_id = (int)($_POST['cliente_id'] ?? 0);
+                        
+                        if ($cliente_id < 1) {
+                            header("Location: ../../gestao_cliente.html?erro=" . urlencode("ID do cliente inválido"));
+                            exit;
+                        }
+                        
+                        $resultado = $controller->apagarCliente($cliente_id);
+                        
+                        if ($resultado['sucesso']) {
+                            header("Location: ../../gestao_cliente.html?sucesso=" . urlencode($resultado['mensagem']));
+                        } else {
+                            header("Location: ../../gestao_cliente.html?erro=" . urlencode($resultado['erro']));
+                        }
+                        exit;
                     
                 case 'editar_usuario':
                     $dados = [

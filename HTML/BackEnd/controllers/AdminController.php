@@ -67,6 +67,83 @@ class AdminController {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+
+    public function obterDetalhesCliente($cliente_id) {
+        try {
+            // Buscar dados do cliente
+            $query_cliente = "SELECT * FROM clientes WHERE id = :id";
+            $stmt_cliente = $this->db->prepare($query_cliente);
+            $stmt_cliente->bindParam(":id", $cliente_id);
+            $stmt_cliente->execute();
+            
+            $cliente = $stmt_cliente->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$cliente) {
+                return ['erro' => 'Cliente não encontrado'];
+            }
+            
+            // Buscar reservas do cliente
+            $query_reservas = "SELECT * FROM reservas 
+                              WHERE cliente_id = :cliente_id 
+                              AND num_pessoas > 0 
+                              ORDER BY data DESC, hora DESC";
+            $stmt_reservas = $this->db->prepare($query_reservas);
+            $stmt_reservas->bindParam(":cliente_id", $cliente_id);
+            $stmt_reservas->execute();
+            
+            $reservas = $stmt_reservas->fetchAll(PDO::FETCH_ASSOC);
+            
+            return [
+                'cliente' => $cliente,
+                'reservas' => $reservas
+            ];
+            
+        } catch (Exception $e) {
+            return ['erro' => 'Erro interno do servidor'];
+        }
+    }
+    
+    public function apagarCliente($cliente_id) {
+        try {
+            $this->db->beginTransaction();
+            
+            // Primeiro, cancelar todas as reservas ativas do cliente
+            $query_cancelar = "UPDATE reservas SET status = 'Cancelado' 
+                              WHERE cliente_id = :cliente_id 
+                              AND status = 'Reservado'";
+            $stmt_cancelar = $this->db->prepare($query_cancelar);
+            $stmt_cancelar->bindParam(":cliente_id", $cliente_id);
+            $stmt_cancelar->execute();
+            
+            // Depois, apagar o cliente
+            $query_cliente = "DELETE FROM clientes WHERE id = :id";
+            $stmt_cliente = $this->db->prepare($query_cliente);
+            $stmt_cliente->bindParam(":id", $cliente_id);
+            
+            if ($stmt_cliente->execute()) {
+                $this->db->commit();
+                return [
+                    'sucesso' => true,
+                    'mensagem' => 'Cliente removido com sucesso!'
+                ];
+            } else {
+                $this->db->rollback();
+                return [
+                    'sucesso' => false,
+                    'erro' => 'Erro ao remover cliente'
+                ];
+            }
+            
+        } catch (Exception $e) {
+            $this->db->rollback();
+            return [
+                'sucesso' => false,
+                'erro' => 'Erro interno do servidor'
+            ];
+        }
+    }
+
+    
     public function adicionarMesa($capacidade) {
         try {
             $stmt = $this->db->prepare("INSERT INTO mesas (capacidade, estado) VALUES (?, 'Livre')");
