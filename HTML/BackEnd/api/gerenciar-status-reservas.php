@@ -42,6 +42,34 @@ switch($method) {
         
         if (isset($_GET['acao'])) {
             switch($_GET['acao']) {
+                
+                case 'reservas_para_garcom':
+                    // Buscar reservas que o garçom pode gerenciar (Reservado e Confirmado)
+                    $query = "SELECT r.*, c.nome as cliente_nome, c.email, c.telemovel,
+                                     m.id as mesa_id, m.capacidade
+                              FROM reservas r 
+                              JOIN clientes c ON r.cliente_id = c.id 
+                              LEFT JOIN mesas m ON r.mesa_id = m.id
+                              WHERE r.status IN ('Reservado', 'Confirmado') 
+                              AND r.data = CURDATE()
+                              ORDER BY 
+                                CASE 
+                                    WHEN r.status = 'Confirmado' THEN 1 
+                                    WHEN r.status = 'Reservado' THEN 2 
+                                    ELSE 3 
+                                END,
+                                r.hora ASC";
+                    
+                    $stmt = $db->prepare($query);
+                    $stmt->execute();
+                    $reservas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    
+                    echo json_encode([
+                        "sucesso" => true,
+                        "reservas" => $reservas
+                    ]);
+                    break;  
+                
                 case 'expirar_automatico':
                     $expiradas = expirarReservasAutomaticamente($db);
                     echo json_encode([
@@ -116,17 +144,36 @@ switch($method) {
             $stmt->bindParam(':reserva_id', $reserva_id);
             
             if ($stmt->execute()) {
-                // Se foi concluída ou expirada, liberar a mesa
-                if (in_array($novo_status, ['Concluido', 'Expirado', 'Cancelado'])) {
-                    $queryMesa = "UPDATE mesas SET estado = 'Livre' 
-                                  WHERE id IN (
-                                      SELECT mesa_id FROM reservas 
-                                      WHERE id = :reserva_id OR reserva_principal_id = :reserva_id
-                                  )";
-                    
-                    $stmtMesa = $db->prepare($queryMesa);
-                    $stmtMesa->bindParam(':reserva_id', $reserva_id);
-                    $stmtMesa->execute();
+                // Lógica especial para ações do garçom
+                if (isset($input['acao_garcom']) && $input['acao_garcom']) {
+                    switch($novo_status) {
+                        case 'Confirmado':
+                            // Quando cliente chega, ocupar a mesa
+                            $queryOcupar = "UPDATE mesas SET estado = 'Ocupada' 
+                                           WHERE id IN (
+                                               SELECT mesa_id FROM reservas 
+                                               WHERE id = :reserva_id OR reserva_principal_id = :reserva_id
+                                           ) AND mesa_id IS NOT NULL";
+                            
+                            $stmtOcupar = $db->prepare($queryOcupar);
+                            $stmtOcupar->bindParam(':reserva_id', $reserva_id);
+                            $stmtOcupar->execute();
+                            break;
+                            
+                        case 'Concluido':
+                        case 'Expirado':
+                            // Quando finaliza ou expira, liberar a mesa
+                            $queryLiberar = "UPDATE mesas SET estado = 'Livre' 
+                                            WHERE id IN (
+                                                SELECT mesa_id FROM reservas 
+                                                WHERE id = :reserva_id OR reserva_principal_id = :reserva_id
+                                            ) AND mesa_id IS NOT NULL";
+                            
+                            $stmtLiberar = $db->prepare($queryLiberar);
+                            $stmtLiberar->bindParam(':reserva_id', $reserva_id);
+                            $stmtLiberar->execute();
+                            break;
+                    }
                 }
                 
                 echo json_encode([

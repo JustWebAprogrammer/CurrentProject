@@ -496,3 +496,194 @@ function iniciarAtualizacaoAutomatica() {
     
     intervalosAtualizacao.push(intervalo);
 }
+
+// Função para carregar reservas que precisam de atenção do garçom
+async function carregarReservasParaGarcom() {
+    try {
+        const response = await fetch('BackEnd/api/gerenciar-status-reservas.php?acao=reservas_para_garcom');
+        const data = await response.json();
+        
+        if (data.sucesso) {
+            mostrarReservasParaGarcom(data.reservas);
+        }
+    } catch (error) {
+        console.error('Erro ao carregar reservas para garçom:', error);
+    }
+}
+
+// Função para mostrar reservas que o garçom pode gerenciar
+function mostrarReservasParaGarcom(reservas) {
+    const container = document.getElementById('reservas-garcom-lista');
+    if (!container) return;
+    
+    if (!reservas || reservas.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #666;">Nenhuma reserva ativa no momento.</p>';
+        return;
+    }
+    
+    container.innerHTML = reservas.map(reserva => {
+        const agora = new Date();
+        const horaReserva = new Date(`${reserva.data} ${reserva.hora}`);
+        const diferenca = Math.floor((agora - horaReserva) / (1000 * 60)); // diferença em minutos
+        
+        let statusCor = '#4CAF50'; // Verde para reservas normais
+        let statusTexto = 'No horário';
+        
+        if (diferenca > 0) {
+            statusCor = diferenca > 15 ? '#f44336' : '#ff9800'; // Vermelho se > 15min, laranja se > 0
+            statusTexto = diferenca > 15 ? `${diferenca} min atrasado` : `${diferenca} min de atraso`;
+        } else if (diferenca > -15) {
+            statusCor = '#2196F3'; // Azul para reservas próximas (15 min antes)
+            statusTexto = 'Cliente pode chegar a qualquer momento';
+        }
+        
+        return `
+            <div class="reserva-garcom-card" style="border-left: 4px solid ${statusCor}">
+                <div class="reserva-header">
+                    <h4>Reserva #${reserva.id}</h4>
+                    <span class="status-badge ${getStatusClass(reserva.status)}">${reserva.status}</span>
+                </div>
+                <div class="reserva-info">
+                    <p><strong>Cliente:</strong> ${reserva.cliente_nome}</p>
+                    <p><strong>Horário:</strong> ${reserva.hora}</p>
+                    <p><strong>Mesa:</strong> ${reserva.mesa_id || 'A ser definida'} - <strong>Pessoas:</strong> ${reserva.num_pessoas}</p>
+                    <p><strong>Status:</strong> <span style="color: ${statusCor}; font-weight: bold;">${statusTexto}</span></p>
+                    <p><strong>Contato:</strong> ${reserva.telemovel}</p>
+                </div>
+                <div class="reserva-acoes-garcom">
+                    ${getAcoesGarcom(reserva)}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Função para definir quais ações o garçom pode fazer baseado no status atual
+function getAcoesGarcom(reserva) {
+    const acoes = [];
+    
+    switch(reserva.status) {
+        case 'Reservado':
+            acoes.push(`
+                <button class="btn-confirmar" onclick="alterarStatusReservaGarcom(${reserva.id}, 'Confirmado')">
+                    ✅ Cliente Chegou
+                </button>
+            `);
+            acoes.push(`
+                <button class="btn-expirar" onclick="alterarStatusReservaGarcom(${reserva.id}, 'Expirado')">
+                    ❌ Cliente Não Veio
+                </button>
+            `);
+            break;
+            
+        case 'Confirmado':
+            acoes.push(`
+                <button class="btn-concluir" onclick="alterarStatusReservaGarcom(${reserva.id}, 'Concluido')">
+                    🍽️ Finalizar e Liberar Mesa
+                </button>
+            `);
+            break;
+            
+        default:
+            acoes.push('<p style="color: #666; font-style: italic;">Nenhuma ação disponível</p>');
+    }
+    
+    return acoes.join('');
+}
+
+// Função específica para ações do garçom
+async function alterarStatusReservaGarcom(reservaId, novoStatus) {
+    let mensagemConfirmacao = '';
+    
+    switch(novoStatus) {
+        case 'Confirmado':
+            mensagemConfirmacao = 'Confirmar que o cliente chegou?';
+            break;
+        case 'Concluido':
+            mensagemConfirmacao = 'Finalizar esta reserva e liberar a mesa?';
+            break;
+        case 'Expirado':
+            mensagemConfirmacao = 'Marcar como expirada? (Cliente não compareceu)';
+            break;
+        default:
+            mensagemConfirmacao = `Alterar status para ${novoStatus}?`;
+    }
+    
+    if (!confirm(mensagemConfirmacao)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('BackEnd/api/gerenciar-status-reservas.php', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                reserva_id: reservaId,
+                novo_status: novoStatus,
+                acao_garcom: true
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.sucesso) {
+            let mensagemSucesso = '';
+            switch(novoStatus) {
+                case 'Confirmado':
+                    mensagemSucesso = 'Cliente confirmado! Mesa ocupada.';
+                    break;
+                case 'Concluido':
+                    mensagemSucesso = 'Reserva finalizada! Mesa liberada.';
+                    break;
+                case 'Expirado':
+                    mensagemSucesso = 'Reserva expirada! Mesa liberada.';
+                    break;
+                default:
+                    mensagemSucesso = data.mensagem;
+            }
+            
+            mostrarMensagem(mensagemSucesso, 'success');
+            
+            // Recarregar todos os dados
+            await Promise.all([
+                carregarEstatisticasMesas(),
+                carregarEstatisticasReservas(),
+                carregarReservasParaGarcom()
+            ]);
+        } else {
+            mostrarMensagem(data.erro || 'Erro ao alterar status', 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao alterar status da reserva:', error);
+        mostrarMensagem('Erro interno do servidor', 'error');
+    }
+}
+
+// Atualizar a função de inicialização para incluir reservas do garçom
+const inicializarDashboardOriginal = inicializarDashboard;
+inicializarDashboard = async function() {
+    await inicializarDashboardOriginal();
+    await carregarReservasParaGarcom();
+};
+
+// Atualizar a função de atualização automática para incluir reservas do garçom
+function iniciarAtualizacaoAutomatica() {
+    const intervalo = setInterval(async () => {
+        try {
+            await verificarReservasExpiradas();
+            
+            await Promise.all([
+                carregarEstatisticasMesas(),
+                carregarEstatisticasReservas(),
+                carregarReservasPendentes(),
+                carregarReservasParaGarcom() // Adicionar esta linha
+            ]);
+        } catch (error) {
+            console.error('Erro na atualização automática:', error);
+        }
+    }, 30000);
+    
+    intervalosAtualizacao.push(intervalo);
+}

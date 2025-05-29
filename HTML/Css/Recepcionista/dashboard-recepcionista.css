@@ -469,3 +469,134 @@ body {
         padding: 15px;
     }
 }
+
+/* Seção de Reservas do Garçom */
+.reservas-garcom-section {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.reservas-garcom-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.reserva-garcom-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    border-left: 4px solid #4CAF50;
+    transition: all 0.3s ease;
+}
+
+.reserva-garcom-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.reserva-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.reserva-header h4 {
+    margin: 0;
+    color: #333;
+    font-size: 1.1em;
+}
+
+.reserva-acoes-garcom {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+.btn-confirmar {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background 0.3s ease;
+}
+
+.btn-confirmar:hover {
+    background: #45a049;
+}
+
+.btn-concluir {
+    background: #2196F3;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background 0.3s ease;
+}
+
+.btn-concluir:hover {
+    background: #1976D2;
+}
+
+.btn-expirar {
+    background: #f44336;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background 0.3s ease;
+}
+
+.btn-expirar:hover {
+    background: #d32f2f;
+}
+
+/* Status badges */
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status-reservado {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-confirmado {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-cancelado {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .reserva-acoes-garcom {
+        flex-direction: column;
+    }
+
+    .btn-confirmar,
+    .btn-concluir,
+    .btn-expirar {
+        width: 100%;
+        text-align: center;
+    }
+}
