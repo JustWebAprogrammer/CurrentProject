@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perguntas Frequentes - Lar Da Dona Xinga</title>
+    <link rel="stylesheet" href="Css/Universal/nav.css">
+    <link rel="stylesheet" href="Css/Universal/footer.css">
+    <style>
+        .faq-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        
+        .faq-container h1 {
+            color: #d4af37;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+        }
+        
+        .faq-intro {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .faq-categories {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .category-btn {
+            background-color: #f8f8f8;
+            border: 2px solid #d4af37;
+            color: #d4af37;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .category-btn:hover,
+        .category-btn.active {
+            background-color: #d4af37;
+            color: white;
+        }
+        
+        .faq-section {
+            margin-bottom: 40px;
+        }
+        
+        .faq-section h2 {
+            color: #333;
+            border-bottom: 3px solid #d4af37;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+        }
+        
+        .faq-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .faq-item:hover {
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        
+        .faq-question {
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-weight: bold;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s ease;
+        }
+        
+        .faq-question:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .faq-question::after {
+            content: '+';
+            font-size: 24px;
+            color: #d4af37;
+            font-weight: bold;
+            transition: transform 0.3s ease;
+        }
+        
+        .faq-question.active::after {
+            content: '−';
+            transform: rotate(180deg);
+        }
+        
+        .faq-answer {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            line-height: 1.6;
+        }
+        
+        .faq-answer.active {
+            padding: 20px;
+            max-height: 500px;
+        }
+        
+        .faq-answer p {
+            margin-bottom: 10px;
+            color: #555;
+        }
+        
+        .faq-answer ul {
+            margin-left: 20px;
+            color: #555;
+        }
+        
+        .faq-answer li {
+            margin-bottom: 5px;
+        }
+        
+        .contact-highlight {
+            background: linear-gradient(135deg, #d4af37, #b8941f);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 40px;
+        }
+        
+        .contact-highlight h3 {
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .contact-highlight p {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .contact-highlight a {
+            color: white;
+            text-decoration: underline;
+        }
+        
+        .search-box {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto 30px;
+            position: relative;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #d4af37;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+        }
+        
+        .search-box input:focus {
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .faq-container {
+                padding: 10px;
+            }
+            
+            .faq-categories {
+                gap: 5px;
+            }
+            
+            .category-btn {
+                padding: 8px 15px;
+                font-size: 12px;
+            }
+            
+            .faq-question {
+                padding: 15px;
+                font-size: 14px;
+            }
+            
+            .faq-answer.active {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navegação -->
+    <nav>
+        <div class="Logotipo">
+            <img src="Fotos/Icondesite.png" alt="Logotipo do Site">
+        </div>
+        <div class="navbar">
+            <button onclick="navigateTo('PaginaIncial.html')">Início</button>
+            <button onclick="navigateTo('Login.html')">Entrar</button>
+            <button onclick="navigateTo('Registrar.html')">Registrar</button>
+        </div>
+    </nav>
+
+    <!-- Conteúdo Principal -->
+    <main>
+        <div class="faq-container">
+            <h1>Perguntas Frequentes</h1>
+            <p class="faq-intro">Encontre respostas rápidas para as dúvidas mais comuns sobre reservas e nosso restaurante</p>
+            
+            <!-- Barra de Pesquisa -->
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 Pesquisar perguntas..." onkeyup="searchFAQ()">
+            </div>
+            
+            <!-- Categorias -->
+            <div class="faq-categories">
+                <button class="category-btn active" onclick="showCategory('all')">Todas</button>
+                <button class="category-btn" onclick="showCategory('reservas')">Reservas</button>
+                <button class="category-btn" onclick="showCategory('conta')">Conta</button>
+                <button class="category-btn" onclick="showCategory('cancelamento')">Cancelamento</button>
+                <button class="category-btn" onclick="showCategory('restaurante')">Restaurante</button>
+            </div>
+
+            <!-- Seção: Reservas -->
+            <div class="faq-section" data-category="reservas">
+                <h2>📅 Reservas Online</h2>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        Como faço uma reserva online?
+                    </div>
+                    <div class="faq-answer">
+                        <p>Para fazer uma reserva:</p>
+                        <ul>
+                            <li>Crie uma conta ou faça login</li>
+                            <li>Clique em "Fazer Reserva"</li>
+                            <li>Escolha data, horário e número de pessoas</li>
+                            <li>Confirme sua reserva</li>
+                            <li>Você receberá uma confirmação por email</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        Com que antecedência posso fazer uma reserva?
+                    </div>
+                    <div class="faq-answer">
+                        <p>Você pode fazer reservas com até 7 dias de antecedência. Recomendamos reservar com pelo menos 24 horas de antecedência, especialmente para fins de semana e datas especiais.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        Qual é o horário de funcionamento?
+                    </div>
+                    <div class="faq-answer">
+                        <p>Nossos horários de funcionamento são:</p>
+                        <ul>
+                            <li><strong>Segunda a Domingo:</strong> 09:00 - 22:00</li>
+
+                        </ul>
+                        <p>As reservas podem ser feitas dentro destes horários.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        Posso alterar minha reserva depois de confirmada?
+                    </div>
+                    <div class="faq-answer">
+                        <p>Sim! Você pode alterar sua reserva através do seu perfil online ou entrando em contato conosco por telefone. Alterações devem ser feitas com pelo menos 2 horas de antecedência.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção: Conta -->
+            <div class="faq-section" data-category="conta">
+                <h2>👤 Conta e Perfil</h2>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        Preciso criar uma conta para fazer reservas?
+                    </div>
+                    <div class="faq-answer">
+                        <p>Sim, é necessário criar uma conta para fazer reservas online. Isso nos permite:</p>
+                        <ul>
+                            <li>Manter seu histórico de reservas</li>
+                            <li>Enviar confirmações e lembretes</li>
+                            <li>Facilitar futuras reservas</li>
+                            <li>Oferecer um melhor atendimento personalizado</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        Esqueci minha senha, como recupero?
+                    </div>
+                    <div class="faq-answer">
+                        <p>Para recuperar sua senha:</p>
+                        <ul>
+                            <li>Clique em "Esqueci minha senha" na página de login</li>
+                            <li>Digite seu email cadastrado</li>
+                            <li>Verifique sua caixa de entrada</li>
+                            <li>Siga as instruções no email para criar uma nova senha</li>
+                        </ul>
+                        <p>Se não receber o email, verifique a pasta de spam ou entre em contato conosco.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        Como atualizo minhas informações pessoais?
+                    </div>
+                    <div class="faq-answer">
+                        <p>Para atualizar suas informações:</p>
+                        <ul>
+                            <li>Faça login na sua conta</li>
+                            <li>Vá para "Meu Perfil"</li>
+                            <li>Clique no ícone de edição (✏️) ao lado do campo que deseja alterar</li>
+                            <li>Faça as alterações e clique em "Salvar"</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção: Cancelamento -->
+            <div class="faq-section" data-category="cancelamento">
+                <h2>❌ Cancelamentos</h2>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        Como cancelo minha reserva?
+                    </div>
+                    <div class="faq-answer">
+                        <p>Você pode cancelar sua reserva de duas formas:</p>
+                        <ul>
+                            <li><strong>Online:</strong> Acesse seu perfil e clique em "Cancelar" na reserva desejada</li>
+                            <li><strong>Por telefone:</strong> Ligue para (+244) 942-761-755</li>
+                        </ul>
+                        <p>Lembre-se: cancelamentos devem ser feitos com pelo menos 2 horas de antecedência.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        Qual é a política de cancelamento?
+                    </div>
+                    <div class="faq-answer">
+                        <p>Nossa política de cancelamento:</p>
+                        <ul>
+                            <li><strong>Mais de 2 horas:</strong> Cancelamento gratuito</li>
+                            <li><strong>Menos de 2 horas:</strong> Sujeito a restrições futuras</li>
+                            <li><strong>Não comparecimento:</strong> Pode resultar em bloqueio temporário</li>
+                        </ul>
+                        <p>Em caso de emergência, entre em contato conosco para avaliarmos a situação.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        O que acontece se eu não comparecer?
+                    </div>
+                    <div class="faq-answer">
+                        <p>No-shows (não comparecimento) podem resultar em:</p>
+                        <ul>
+                            <li>Advertência na primeira ocorrência</li>
+                            <li>Restrição temporária para novas reservas</li>
+                            <li>Bloqueio da conta em casos repetidos</li>
+                        </ul>
+                        <p>Por favor, sempre cancele se não puder comparecer.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção: Restaurante -->
+            <div class="faq-section" data-category="restaurante">
+                <h2>🍽️ Sobre o Restaurante</h2>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        Vocês aceitam grupos grandes?
+                    </div>
+                    <div class="faq-answer">
+                        <p>Sim! Aceitamos grandes grupos de pessoas através do sistema online. Para grupos maiores que 20, entre em contato diretamente conosco pelo telefone (+244) 942-761-755 para arranjos especiais.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        O restaurante é acessível para pessoas com deficiência?
+                    </div>
+                    <div class="faq-answer">
+                        <p>Sim, nosso restaurante é totalmente acessível, com rampas de acesso e banheiros adaptados. Se você tiver necessidades específicas, por favor mencione nas observações da reserva.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        Posso comemorar aniversários no restaurante?
+                    </div>
+                    <div class="faq-answer">
+                        <p>Claro! Adoramos celebrações!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contato em Destaque -->
+            <div class="contact-highlight">
+                <h3>Não encontrou sua resposta?</h3>
+                <p>Nossa equipe está pronta para ajudar!</p>
+                <p><strong>📞 Telefone:</strong> (+244) 942-761-755</p>
+                <p><strong>📧 Email:</strong> <a href="mailto:Tomaszinho19@gmail.com">Tomaszinho19@gmail.com</a></p>
+                <p><strong>⏰ Atendimento:</strong> Segunda a Domingo, 9:00 - 18:00</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="footer-section">
+        <div class="footer-container">
+            <div class="footer-logo">
+                <img src="Fotos/Icondesite.png" alt="Logo do Restaurante">
+                <p>Lar Da Dona Xinga</p>
+            </div>
+            
+            <div class="footer-help">
+                <h3>Precisa de ajuda com sua reserva?</h3>
+                <p>Entre em contato conosco: <a href="mailto:Tomaszinho19@gmail.com">contato@restaurante.com</a></p>
+                <p>Telefone: (+244) 942-761-755</p>
+            </div>
+            <div class="footer-links">
+                <h3>Dúvidas Frequentes</h3>
+                <ul>
+                    <li><a href="faq.html">Perguntas Frequentes</a></li>
+                    <li><a href="termos.html">Termos de Uso e Política de Privacidade</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Lar Da Dona Xinga. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Função para toggle das perguntas
+        function toggleFAQ(element) {
+            const answer = element.nextElementSibling;
+            const isActive = answer.classList.contains('active');
+            
+            // Fechar todas as outras respostas
+            document.querySelectorAll('.faq-answer.active').forEach(item => {
+                item.classList.remove('active');
+                item.previousElementSibling.classList.remove('active');
+            });
+            
+            // Abrir/fechar a atual
+            if (!isActive) {
+                answer.classList.add('active');
+                element.classList.add('active');
+            }
+        }
+
+        // Função para filtrar por categoria
+        function showCategory(category) {
+            // Atualizar botões ativos
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Mostrar/ocultar seções
+            document.querySelectorAll('.faq-section').forEach(section => {
+                if (category === 'all' || section.dataset.category === category) {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        }
+
+        // Função de pesquisa
+        function searchFAQ() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const faqItems = document.querySelectorAll('.faq-item');
+            
+            faqItems.forEach(item => {
+                const question = item.querySelector('.faq-question').textContent.toLowerCase();
+                const answer = item.querySelector('.faq-answer').textContent.toLowerCase();
+                
+                if (question.includes(searchTerm) || answer.includes(searchTerm)) {
+                    item.style.display = 'block';
+                    item.closest('.faq-section').style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            // Se não há termo de pesquisa, mostrar tudo
+            if (searchTerm === '') {
+                faqItems.forEach(item => {
+                    item.style.display = 'block';
+                });
+                document.querySelectorAll('.faq-section').forEach(section => {
+                    section.style.display = 'block';
+                });
+            }
+        }
+
+        // Função de navegação
+        function navigateTo(url) {
+            window.location.href = url;
+        }
+    </script>
+</body>
+</html>

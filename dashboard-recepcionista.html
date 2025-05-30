@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Recepcionista - Lar da Dona Xinga</title>
+    <link rel="stylesheet" href="Css/Universal/nav.css">
+    <link rel="stylesheet" href="Css/Universal/footer.css">
+    <link rel="stylesheet" href="Css/Recepcionista/dashboard-recepcionista.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="Logotipo">
+                <img src="Fotos/Icondesite.png" alt="Logotipo do Lar da Dona Xinga">
+            </div>
+            <div class="navbar">
+                <button onclick="navigateTo('dashboard-recepcionista.html')" class="active">Dashboard</button>
+                <button onclick="navigateTo('Recepcionista.html')">Atendimento</button>
+                <button onclick="navigateTo('BackEnd/api/logoff.php')">Sair</button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="dashboard-container">
+            <!-- Cabeçalho de Boas-vindas -->
+            <section class="welcome-section">
+                <h1>Dashboard do Recepcionista</h1>
+                <p id="usuario-nome">Bem-vindo(a)!</p>
+                <p id="data-atual"></p>
+            </section>
+
+            <!-- Estatísticas Rápidas -->
+            <section class="stats-section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">🪑</div>
+                        <div class="stat-content">
+                            <h3 id="mesas-disponiveis">-</h3>
+                            <p>Mesas Disponíveis</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-content">
+                            <h3 id="mesas-ocupadas">-</h3>
+                            <p>Mesas Ocupadas</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📅</div>
+                        <div class="stat-content">
+                            <h3 id="reservas-hoje">-</h3>
+                            <p>Reservas Hoje</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⏰</div>
+                        <div class="stat-content">
+                            <h3 id="proximas-reservas">-</h3>
+                            <p>Próximas 2h</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ações Rápidas -->
+            <section class="quick-actions-section">
+                <h2>Ações Rápidas</h2>
+                <div class="actions-grid">
+                    <div class="action-card" onclick="navigateTo('Recepcionista.html')">
+                        <div class="action-icon">🔍</div>
+                        <h3>Buscar Cliente</h3>
+                        <p>Encontrar e gerenciar informações de clientes</p>
+                    </div>
+                    <div class="action-card" onclick="scrollToOcupacao()">
+                        <div class="action-icon">➕</div>
+                        <h3>Ocupar Mesa</h3>
+                        <p>Registrar walk-in ou ocupação imediata</p>
+                    </div>
+                    <div class="action-card" onclick="scrollToMesasOcupadas()">
+                        <div class="action-icon">📋</div>
+                        <h3>Liberar Mesa</h3>
+                        <p>Finalizar ocupação e liberar mesa</p>
+                    </div>
+                    <div class="action-card" onclick="atualizarDados()">
+                        <div class="action-icon">🔄</div>
+                        <h3>Atualizar Dados</h3>
+                        <p>Sincronizar informações em tempo real</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reservas de Hoje -->
+            <section class="reservas-hoje-section">
+                <h2>Reservas de Hoje</h2>
+                <div id="reservas-hoje-lista" class="reservas-lista">
+                    <!-- Reservas serão carregadas aqui -->
+                </div>
+            </section>
+
+
+<!-- Reservas Pendentes (Precisam de Atenção) -->
+<section class="reservas-pendentes-section">
+    <h2>⚠️ Reservas Precisando de Atenção</h2>
+    <p style="color: #666; margin-bottom: 15px;">
+        Reservas com mais de 10 minutos de atraso. Após 20 minutos, são automaticamente expiradas.
+    </p>
+    <div id="reservas-pendentes-lista" class="reservas-pendentes-lista">
+        <!-- Reservas pendentes serão carregadas aqui -->
+    </div>
+</section>
+
+
+<!-- Gestão de Reservas - Garçom -->
+<section class="reservas-garcom-section">
+    <h2>🍽️ Gestão de Reservas - Atendimento</h2>
+    <p style="color: #666; margin-bottom: 15px;">
+        Gerencie o atendimento das reservas: confirme chegadas, finalize refeições e libere mesas.
+    </p>
+    <div id="reservas-garcom-lista" class="reservas-garcom-lista">
+        <!-- Reservas para o garçom serão carregadas aqui -->
+    </div>
+</section>
+
+            <!-- Mesas - Visão Geral -->
+            <section class="mesas-overview-section">
+                <h2>Status das Mesas</h2>
+                <div id="mesas-overview" class="mesas-overview-grid">
+                    <!-- Mesas serão carregadas aqui -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer-section">
+        <div class="footer-container">
+            <div class="footer-logo">
+                <img src="Fotos/Icondesite.png" alt="Logo do Restaurante">
+                <p>Lar Da Dona Xinga</p>
+            </div>
+            <div class="footer-help">
+                <h3>Sistema Recepcionista</h3>
+                <p>Versão 1.0 - Dashboard Integrado</p>
+                <p>Suporte: (+244) 942-761-755</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 Lar Da Dona Xinga - Sistema de Gestão</p>
+        </div>
+    </footer>
+
+    <script src="Js/Recepcionista/dashboard-recepcionista.js"></script>
+</body>
+</html>

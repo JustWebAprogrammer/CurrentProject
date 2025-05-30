@@ -1,0 +1,52 @@
+.Logotipo img {
+    width: 100px;
+    height: 100px;
+}
+
+nav {
+    background-color: #667743;
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    z-index: 999;
+}
+
+.navbar {
+    display: flex;
+    gap: 1rem;
+}
+
+.navbar button {
+    background-color: #bacf7f;
+    color: #2B341D;
+    border: none;
+    font-size: 16px;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    border-radius: 5px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.navbar button:hover {
+    background-color: #a3b76d;
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    .navbar button {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
