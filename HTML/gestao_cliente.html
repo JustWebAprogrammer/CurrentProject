@@ -96,13 +96,27 @@
     </div>
 
     <!-- Modal para Ver Detalhes do Cliente -->
-    <div id="modal-cliente" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="fecharModalCliente()">&times;</span>
-            <h2>Detalhes do Cliente</h2>
-            <div id="detalhes-cliente"></div>
+<div id="modal-cliente" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="fecharModalCliente()">&times;</span>
+        <h2>Detalhes do Cliente</h2>
+        <div class="detalhes-info">
+            <div class="info-basica">
+                <h3>Informações Básicas</h3>
+                <p><strong>Nome:</strong> <span id="detalhe-nome"></span></p>
+                <p><strong>Email:</strong> <span id="detalhe-email"></span></p>
+                <p><strong>Telefone:</strong> <span id="detalhe-telefone"></span></p>
+                <p><strong>Data de Cadastro:</strong> <span id="detalhe-data-cadastro"></span></p>
+                <p><strong>Total de Reservas:</strong> <span id="detalhe-total-reservas"></span></p>
+            </div>
+            
+            <div class="historico-section">
+                <h3>Histórico de Reservas</h3>
+                <div id="historico-reservas"></div>
+            </div>
         </div>
     </div>
+</div>
 
  <!--Rodape-->
 

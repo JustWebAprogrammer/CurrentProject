@@ -300,19 +300,30 @@ function apagarCliente(clienteId, nomeCliente) {
     formData.append('acao', 'apagar_cliente');
     formData.append('cliente_id', clienteId);
     
+    console.log('Enviando requisição para apagar cliente:', clienteId);
+    
     fetch('BackEnd/api/admin-usuarios.php', {
         method: 'POST',
         body: formData
     })
     .then(response => {
-        // Como a resposta redireciona, aguardar e recarregar
-        setTimeout(() => {
-            window.location.reload();
-        }, 100);
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
+        // Verificar se houve redirecionamento
+        if (response.redirected) {
+            console.log('Redirecionado para:', response.url);
+            window.location.href = response.url;
+        } else {
+            // Aguardar um pouco e recarregar
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
+        }
     })
     .catch(error => {
         console.error('Erro ao apagar cliente:', error);
-        alert('Erro ao apagar cliente. Tente novamente.');
+        alert('Erro ao apagar cliente: ' + error.message);
     });
 }
 

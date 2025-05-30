@@ -105,29 +105,97 @@ class AdminController {
     
     public function apagarCliente($cliente_id) {
         try {
+            error_log("Iniciando processo de apagar cliente ID: " . $cliente_id);
+            
             $this->db->beginTransaction();
             
-            // Primeiro, cancelar todas as reservas ativas do cliente
-            $query_cancelar = "UPDATE reservas SET status = 'Cancelado' 
-                              WHERE cliente_id = :cliente_id 
-                              AND status = 'Reservado'";
-            $stmt_cancelar = $this->db->prepare($query_cancelar);
-            $stmt_cancelar->bindParam(":cliente_id", $cliente_id);
-            $stmt_cancelar->execute();
+            // Verificar se o cliente existe
+            $query_verificar = "SELECT id, nome FROM clientes WHERE id = :id";
+            $stmt_verificar = $this->db->prepare($query_verificar);
+            $stmt_verificar->bindParam(":id", $cliente_id, PDO::PARAM_INT);
+            $stmt_verificar->execute();
             
-            // Depois, apagar o cliente
+            $cliente = $stmt_verificar->fetch(PDO::FETCH_ASSOC);
+            if (!$cliente) {
+                $this->db->rollback();
+                return [
+                    'sucesso' => false,
+                    'erro' => 'Cliente não encontrado'
+                ];
+            }
+            
+            error_log("Cliente encontrado: " . $cliente['nome']);
+            
+            // PASSO 1: Primeiro, apagar reservas "filhas" (que referenciam outras reservas)
+            $query_filhas = "DELETE FROM reservas 
+                            WHERE cliente_id = :cliente_id 
+                            AND reserva_principal_id IS NOT NULL";
+            $stmt_filhas = $this->db->prepare($query_filhas);
+            $stmt_filhas->bindParam(":cliente_id", $cliente_id, PDO::PARAM_INT);
+            
+            if (!$stmt_filhas->execute()) {
+                $this->db->rollback();
+                error_log("Erro ao apagar reservas filhas do cliente: " . $cliente_id);
+                return [
+                    'sucesso' => false,
+                    'erro' => 'Erro ao apagar reservas secundárias do cliente'
+                ];
+            }
+            
+            $reservas_filhas_apagadas = $stmt_filhas->rowCount();
+            error_log("Reservas filhas apagadas: " . $reservas_filhas_apagadas);
+            
+            // PASSO 2: Depois, apagar reservas principais (que não referenciam outras)
+            $query_principais = "DELETE FROM reservas 
+                               WHERE cliente_id = :cliente_id 
+                               AND reserva_principal_id IS NULL";
+            $stmt_principais = $this->db->prepare($query_principais);
+            $stmt_principais->bindParam(":cliente_id", $cliente_id, PDO::PARAM_INT);
+            
+            if (!$stmt_principais->execute()) {
+                $this->db->rollback();
+                error_log("Erro ao apagar reservas principais do cliente: " . $cliente_id);
+                return [
+                    'sucesso' => false,
+                    'erro' => 'Erro ao apagar reservas principais do cliente'
+                ];
+            }
+            
+            $reservas_principais_apagadas = $stmt_principais->rowCount();
+            error_log("Reservas principais apagadas: " . $reservas_principais_apagadas);
+            
+            // PASSO 3: Verificar se ainda restam reservas (caso haja alguma inconsistência)
+            $query_verificar_reservas = "SELECT COUNT(*) as total FROM reservas WHERE cliente_id = :cliente_id";
+            $stmt_verificar_reservas = $this->db->prepare($query_verificar_reservas);
+            $stmt_verificar_reservas->bindParam(":cliente_id", $cliente_id, PDO::PARAM_INT);
+            $stmt_verificar_reservas->execute();
+            $resultado = $stmt_verificar_reservas->fetch(PDO::FETCH_ASSOC);
+            
+            if ($resultado['total'] > 0) {
+                $this->db->rollback();
+                error_log("Ainda restam " . $resultado['total'] . " reservas para o cliente: " . $cliente_id);
+                return [
+                    'sucesso' => false,
+                    'erro' => 'Não foi possível apagar todas as reservas do cliente'
+                ];
+            }
+            
+            // PASSO 4: Agora apagar o cliente
             $query_cliente = "DELETE FROM clientes WHERE id = :id";
             $stmt_cliente = $this->db->prepare($query_cliente);
-            $stmt_cliente->bindParam(":id", $cliente_id);
+            $stmt_cliente->bindParam(":id", $cliente_id, PDO::PARAM_INT);
             
-            if ($stmt_cliente->execute()) {
+            if ($stmt_cliente->execute() && $stmt_cliente->rowCount() > 0) {
                 $this->db->commit();
+                error_log("Cliente apagado com sucesso: " . $cliente_id);
+                $total_reservas = $reservas_filhas_apagadas + $reservas_principais_apagadas;
                 return [
                     'sucesso' => true,
-                    'mensagem' => 'Cliente removido com sucesso!'
+                    'mensagem' => "Cliente removido com sucesso! (Foram removidas {$total_reservas} reservas)"
                 ];
             } else {
                 $this->db->rollback();
+                error_log("Erro ao apagar cliente: " . $cliente_id);
                 return [
                     'sucesso' => false,
                     'erro' => 'Erro ao remover cliente'
@@ -135,10 +203,14 @@ class AdminController {
             }
             
         } catch (Exception $e) {
-            $this->db->rollback();
+            if ($this->db->inTransaction()) {
+                $this->db->rollback();
+            }
+            error_log("Exceção em apagarCliente: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
             return [
                 'sucesso' => false,
-                'erro' => 'Erro interno do servidor'
+                'erro' => 'Erro interno: ' . $e->getMessage()
             ];
         }
     }
